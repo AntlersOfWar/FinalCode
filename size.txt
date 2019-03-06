@@ -1,0 +1,2 @@
+   text	   data	    bss	    dec	    hex	filename
+  33116	   3424	   5608	  42148	   a4a4	../FinalCode.elf
