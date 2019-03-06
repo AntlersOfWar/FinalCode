@@ -209,6 +209,114 @@ void turnRight(int percent, float degrees) {
     br_motor.Stop();
 }
 
+void RPS_X(float startX, float inches) {
+    if (RPS.X() < startX + (inches - 0.2)) {
+        LCD.Clear();
+        LCD.WriteLine("Too short!");
+        bl_motor.SetPercent(15);
+        fr_motor.SetPercent(-15);
+        fl_motor.SetPercent(15);
+        br_motor.SetPercent(-15);
+        while (RPS.X() < startX + inches) {
+            LCD.WriteRC(RPS.X(),2,12);
+            LCD.WriteRC(RPS.Y(),3,12);
+            LCD.WriteRC(RPS.Heading(),4,12);
+        }
+        bl_motor.Stop();
+        fr_motor.Stop();
+        fl_motor.Stop();
+        br_motor.Stop();
+    } else if (RPS.X() > startX + (inches + 0.2)) {
+        LCD.Clear();
+        LCD.WriteLine("Too far!");
+        bl_motor.SetPercent(-15);
+        fr_motor.SetPercent(15);
+        fl_motor.SetPercent(-15);
+        br_motor.SetPercent(15);
+        while (RPS.X() > startX + inches) {
+            LCD.WriteRC(RPS.X(),2,12);
+            LCD.WriteRC(RPS.Y(),3,12);
+            LCD.WriteRC(RPS.Heading(),4,12);
+        }
+        bl_motor.Stop();
+        fr_motor.Stop();
+        fl_motor.Stop();
+        br_motor.Stop();
+    }
+}
+
+void RPS_Y(float startY, float inches) {
+    if (RPS.Y() < startY + (inches - 0.2)) {
+        LCD.Clear();
+        LCD.WriteLine("Too short!");
+        bl_motor.SetPercent(15);
+        fr_motor.SetPercent(-15);
+        fl_motor.SetPercent(15);
+        br_motor.SetPercent(-15);
+        while (RPS.Y() < startY + inches) {
+            LCD.WriteRC(RPS.X(),2,12);
+            LCD.WriteRC(RPS.Y(),3,12);
+            LCD.WriteRC(RPS.Heading(),4,12);
+        }
+        bl_motor.Stop();
+        fr_motor.Stop();
+        fl_motor.Stop();
+        br_motor.Stop();
+    } else if (RPS.Y() > startY + (inches + 0.2)) {
+        LCD.Clear();
+        LCD.WriteLine("Too far!");
+        bl_motor.SetPercent(-15);
+        fr_motor.SetPercent(15);
+        fl_motor.SetPercent(-15);
+        br_motor.SetPercent(15);
+        while (RPS.Y() > startY + inches) {
+            LCD.WriteRC(RPS.X(),2,12);
+            LCD.WriteRC(RPS.Y(),3,12);
+            LCD.WriteRC(RPS.Heading(),4,12);
+        }
+        bl_motor.Stop();
+        fr_motor.Stop();
+        fl_motor.Stop();
+        br_motor.Stop();
+    }
+}
+
+void RPS_Angle(float desiredDeg) {
+    if (RPS.Heading() < desiredDeg - 1.0) {
+        LCD.Clear();
+        LCD.WriteLine("Angle short!");
+        bl_motor.SetPercent(-15);
+        fr_motor.SetPercent(-15);
+        fl_motor.SetPercent(-15);
+        br_motor.SetPercent(-15);
+        while (RPS.Heading() < desiredDeg) {
+            LCD.WriteRC(RPS.X(),2,12);
+            LCD.WriteRC(RPS.Y(),3,12);
+            LCD.WriteRC(RPS.Heading(),4,12);
+        }
+        bl_motor.Stop();
+        fr_motor.Stop();
+        fl_motor.Stop();
+        br_motor.Stop();
+    } else if (RPS.Heading() > desiredDeg + 1.0) {
+        LCD.Clear();
+        LCD.WriteLine("Angle over!");
+        bl_motor.SetPercent(15);
+        fr_motor.SetPercent(15);
+        fl_motor.SetPercent(15);
+        br_motor.SetPercent(15);
+        while (RPS.Heading() > desiredDeg) {
+            LCD.WriteRC(RPS.X(),2,12);
+            LCD.WriteRC(RPS.Y(),3,12);
+            LCD.WriteRC(RPS.Heading(),4,12);
+        }
+        bl_motor.Stop();
+        fr_motor.Stop();
+        fl_motor.Stop();
+        br_motor.Stop();
+    }
+}
+
 void waitForLight() {
     //Initialize the screen
     LCD.Clear(BLACK);
