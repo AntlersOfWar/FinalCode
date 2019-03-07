@@ -8,15 +8,18 @@
 #define WHEEL_RADIUS 1.375
 #define COUNTS_PER_REV 48
 #define PI 3.14159265
-#define ROBOT_RADIUS 4.0
+#define ROBOT_RADIUS 4.5
 #define OFFSET 8.0
 #define RED_THRESH 0.7
+float X_coord;
+float Y_coord;
 
 /* TODO: Make sure you have the right number of motors/encoders declared. */
 FEHServo lever_servo(FEHServo::Servo6);
+FEHServo token_servo(FEHServo::Servo0);
 
 /* NOTE: P3_6 and P3_7 cannot be used for digital encoders. Also, "fr" means front-right. "bl" means back-left. */
-DigitalEncoder fl_encoder(FEHIO::P1_0);
+DigitalEncoder fl_encoder(FEHIO::P1_1);
 DigitalEncoder br_encoder(FEHIO::P2_0);
 
 //Declare motors
@@ -191,7 +194,7 @@ void turnRight(int percent, float degrees) {
     //keep running motors
     while(fl_encoder.Counts() < counts || br_encoder.Counts() < counts) {
         LCD.Clear();
-        LCD.Write("Turning left ");
+        LCD.Write("Turning right ");
         LCD.Write(degrees);
         LCD.WriteLine(" degrees");
         LCD.Write("THEORETICAL COUNTS: ");
@@ -282,13 +285,14 @@ void RPS_Y(float startY, float inches) {
 }
 
 void RPS_Angle(float desiredDeg) {
+    if (desiredDeg > 1.0) {
     if (RPS.Heading() < desiredDeg - 1.0) {
         LCD.Clear();
         LCD.WriteLine("Angle short!");
-        bl_motor.SetPercent(-15);
-        fr_motor.SetPercent(-15);
-        fl_motor.SetPercent(-15);
-        br_motor.SetPercent(-15);
+        bl_motor.SetPercent(-30);
+        fr_motor.SetPercent(-30);
+        fl_motor.SetPercent(-30);
+        br_motor.SetPercent(-30);
         while (RPS.Heading() < desiredDeg) {
             LCD.WriteRC(RPS.X(),2,12);
             LCD.WriteRC(RPS.Y(),3,12);
@@ -301,10 +305,10 @@ void RPS_Angle(float desiredDeg) {
     } else if (RPS.Heading() > desiredDeg + 1.0) {
         LCD.Clear();
         LCD.WriteLine("Angle over!");
-        bl_motor.SetPercent(15);
-        fr_motor.SetPercent(15);
-        fl_motor.SetPercent(15);
-        br_motor.SetPercent(15);
+        bl_motor.SetPercent(30);
+        fr_motor.SetPercent(30);
+        fl_motor.SetPercent(30);
+        br_motor.SetPercent(30);
         while (RPS.Heading() > desiredDeg) {
             LCD.WriteRC(RPS.X(),2,12);
             LCD.WriteRC(RPS.Y(),3,12);
@@ -314,6 +318,42 @@ void RPS_Angle(float desiredDeg) {
         fr_motor.Stop();
         fl_motor.Stop();
         br_motor.Stop();
+    }
+    } else {
+        if (RPS.Heading() > 350.0 && RPS.Heading() < 359.0) {
+            LCD.Clear();
+            LCD.WriteLine("Angle short!");
+            bl_motor.SetPercent(-30);
+            fr_motor.SetPercent(-30);
+            fl_motor.SetPercent(-30);
+            br_motor.SetPercent(-30);
+            while (RPS.Heading() > 2.0) {
+                LCD.WriteRC(RPS.X(),2,12);
+                LCD.WriteRC(RPS.Y(),3,12);
+                LCD.WriteRC(RPS.Heading(),4,12);
+            }
+            bl_motor.Stop();
+            fr_motor.Stop();
+            fl_motor.Stop();
+            br_motor.Stop();
+        } else if (RPS.Heading() < 10.0 && RPS.Heading() > 1.0) {
+            LCD.Clear();
+            LCD.WriteLine("Angle over!");
+            bl_motor.SetPercent(30);
+            fr_motor.SetPercent(30);
+            fl_motor.SetPercent(30);
+            br_motor.SetPercent(30);
+            while (RPS.Heading() < 358.0) {
+                LCD.WriteRC(RPS.X(),2,12);
+                LCD.WriteRC(RPS.Y(),3,12);
+                LCD.WriteRC(RPS.Heading(),4,12);
+            }
+            bl_motor.Stop();
+            fr_motor.Stop();
+            fl_motor.Stop();
+            br_motor.Stop();
+        }
+
     }
 }
 
@@ -345,6 +385,29 @@ void doLever() {
 
 void doToken() {
     waitForLight();
+    move_forward(50,3.0);
+    X_coord = RPS.X();
+    Y_coord = RPS.Y();
+    turnRight(40,60.0);
+    RPS_Angle(0.0);
+    X_coord = RPS.X();
+    Y_coord = RPS.Y();
+    move_forward(50,18.5);
+    RPS_X(X_coord, 18.5);
+    X_coord = RPS.X();
+    Y_coord = RPS.Y();
+    lever_servo.SetDegree(3.0);
+    Sleep(4000);
+    lever_servo.SetDegree(90.0);
+    turnLeft(40,90.0);
+    RPS_Angle(90.0);
+    X_coord = RPS.X();
+    Y_coord = RPS.Y();
+    move_forward(50,40.0);
+    RPS_Y(Y_coord,40);
+    X_coord = RPS.X();
+    Y_coord = RPS.Y();
+
 }
 
 void doFoosball() {
@@ -357,10 +420,23 @@ void finish() {
 
 int main()
 {
-    // min for main servo: 725
-    // max for main servo: 2468
-    // min for lever servo: 514
-    // max for lever servo: 2430
+    // min for lever servo: 725
+    // max for lever servo: 2468
+    // min for token servo: 514
+    // max for token servo: 2430
+
+    RPS.InitializeTouchMenu();
+
+    lever_servo.SetMin(725);
+    lever_servo.SetMax(2468);
+    token_servo.SetMin(514);
+    token_servo.SetMax(2430);
+    Sleep(500);
+
+    lever_servo.SetDegree(90);
+    token_servo.SetDegree(90);
+    Sleep(1000);
+    doToken();
 
 }
 
