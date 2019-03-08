@@ -4,12 +4,13 @@
 #include <FEHMotor.h>
 #include <FEHRPS.h>
 #include <FEHServo.h>
+#include <FEHSD.h>
 
 #define WHEEL_RADIUS 1.375
 #define COUNTS_PER_REV 48
 #define PI 3.14159265
 #define ROBOT_RADIUS 4.5
-#define OFFSET 8.0
+#define QR_OFFSET 2.0
 #define RED_THRESH 0.7
 float X_coord;
 float Y_coord;
@@ -216,10 +217,10 @@ void RPS_X(float startX, float inches) {
     if (RPS.X() < startX + (inches - 0.2)) {
         LCD.Clear();
         LCD.WriteLine("Too short!");
-        bl_motor.SetPercent(15);
-        fr_motor.SetPercent(-15);
-        fl_motor.SetPercent(15);
-        br_motor.SetPercent(-15);
+        bl_motor.SetPercent(30);
+        fr_motor.SetPercent(-30);
+        fl_motor.SetPercent(30);
+        br_motor.SetPercent(-30);
         while (RPS.X() < startX + inches) {
             LCD.WriteRC(RPS.X(),2,12);
             LCD.WriteRC(RPS.Y(),3,12);
@@ -232,10 +233,10 @@ void RPS_X(float startX, float inches) {
     } else if (RPS.X() > startX + (inches + 0.2)) {
         LCD.Clear();
         LCD.WriteLine("Too far!");
-        bl_motor.SetPercent(-15);
-        fr_motor.SetPercent(15);
-        fl_motor.SetPercent(-15);
-        br_motor.SetPercent(15);
+        bl_motor.SetPercent(-30);
+        fr_motor.SetPercent(30);
+        fl_motor.SetPercent(-30);
+        br_motor.SetPercent(30);
         while (RPS.X() > startX + inches) {
             LCD.WriteRC(RPS.X(),2,12);
             LCD.WriteRC(RPS.Y(),3,12);
@@ -252,10 +253,10 @@ void RPS_Y(float startY, float inches) {
     if (RPS.Y() < startY + (inches - 0.2)) {
         LCD.Clear();
         LCD.WriteLine("Too short!");
-        bl_motor.SetPercent(15);
-        fr_motor.SetPercent(-15);
-        fl_motor.SetPercent(15);
-        br_motor.SetPercent(-15);
+        bl_motor.SetPercent(30);
+        fr_motor.SetPercent(-30);
+        fl_motor.SetPercent(30);
+        br_motor.SetPercent(-30);
         while (RPS.Y() < startY + inches) {
             LCD.WriteRC(RPS.X(),2,12);
             LCD.WriteRC(RPS.Y(),3,12);
@@ -268,10 +269,10 @@ void RPS_Y(float startY, float inches) {
     } else if (RPS.Y() > startY + (inches + 0.2)) {
         LCD.Clear();
         LCD.WriteLine("Too far!");
-        bl_motor.SetPercent(-15);
-        fr_motor.SetPercent(15);
-        fl_motor.SetPercent(-15);
-        br_motor.SetPercent(15);
+        bl_motor.SetPercent(-30);
+        fr_motor.SetPercent(30);
+        fl_motor.SetPercent(-30);
+        br_motor.SetPercent(30);
         while (RPS.Y() > startY + inches) {
             LCD.WriteRC(RPS.X(),2,12);
             LCD.WriteRC(RPS.Y(),3,12);
@@ -320,7 +321,7 @@ void RPS_Angle(float desiredDeg) {
         br_motor.Stop();
     }
     } else {
-        if (RPS.Heading() > 350.0 && RPS.Heading() < 359.0) {
+        if (RPS.Heading() > 270.0 && RPS.Heading() < 359.9) {
             LCD.Clear();
             LCD.WriteLine("Angle short!");
             bl_motor.SetPercent(-30);
@@ -336,7 +337,7 @@ void RPS_Angle(float desiredDeg) {
             fr_motor.Stop();
             fl_motor.Stop();
             br_motor.Stop();
-        } else if (RPS.Heading() < 10.0 && RPS.Heading() > 1.0) {
+        } else if (RPS.Heading() < 90.0 && RPS.Heading() > 0.1) {
             LCD.Clear();
             LCD.WriteLine("Angle over!");
             bl_motor.SetPercent(30);
@@ -358,11 +359,11 @@ void RPS_Angle(float desiredDeg) {
 }
 
 void waitForLight() {
-    //Initialize the screen
-    LCD.Clear(BLACK);
-    LCD.SetFontColor(WHITE);
 
-    while(cds.Value() > RED_THRESH) {
+    float time = TimeNow();
+
+    // If 30 seconds pass and no light is read, just start
+    while(cds.Value() > RED_THRESH && TimeNow() - time < 30) {
         LCD.Clear();
         LCD.WriteLine("Looking for Red Light...");
         LCD.WriteLine(cds.Value());
@@ -384,30 +385,107 @@ void doLever() {
 }
 
 void doToken() {
+    // Wait for LED to turn red
     waitForLight();
-    move_forward(50,3.0);
-    X_coord = RPS.X();
-    Y_coord = RPS.Y();
-    turnRight(40,60.0);
-    RPS_Angle(0.0);
-    X_coord = RPS.X();
-    Y_coord = RPS.Y();
-    move_forward(50,18.5);
-    RPS_X(X_coord, 18.5);
-    X_coord = RPS.X();
-    Y_coord = RPS.Y();
-    lever_servo.SetDegree(3.0);
-    Sleep(4000);
-    lever_servo.SetDegree(90.0);
-    turnLeft(40,90.0);
-    RPS_Angle(90.0);
-    X_coord = RPS.X();
-    Y_coord = RPS.Y();
-    move_forward(50,40.0);
-    RPS_Y(Y_coord,40);
+
+    // Go straight
+    move_forward(50, 2.8);
+
+    // Turn right
+    turnRight(40, 50.0);
+
+    // Adjust heading
+    RPS_Angle(3.0);
+
+    // Store current location
     X_coord = RPS.X();
     Y_coord = RPS.Y();
 
+    // Go straight
+    move_forward(50, 17.0);
+
+    // Adjust x-location
+    RPS_X(X_coord, 16.0 + QR_OFFSET);
+
+    // Press RPS button
+    lever_servo.SetDegree(0.0);
+    Sleep(4000);
+    lever_servo.SetDegree(90.0);
+
+    // Move backward
+    move_backward(50, 1.0);
+
+    // Turn left
+    turnLeft(40, 20.0);
+
+    // Adjust heading
+    RPS_Angle(20.0);
+
+    // Store current location
+    X_coord = RPS.X();
+    Y_coord = RPS.Y();
+
+    // Go straight
+    move_forward(50, 1.0);
+
+    // Turn left
+    turnLeft(40, 65.0);
+
+    // Adjust heading
+    RPS_Angle(85.0);
+
+    // Store current location
+    X_coord = RPS.X();
+    Y_coord = RPS.Y();
+
+    // Go straight
+    move_forward(80, 23.0);
+
+    // Go straight
+    move_forward(50, 23.0);
+
+    // Adjust y-location
+    RPS_Y(Y_coord, 46.0 + QR_OFFSET);
+
+    // Adjust heading
+    RPS_Angle(90.0);
+
+    // Turn left
+    turnLeft(40, 121.0);
+
+    // Adjust heading
+    RPS_Angle(236.0);
+
+    // Go forward
+    move_forward(50, 26.0);
+
+    for(int i = 1; i < 4; i++){
+        // Turn right
+        turnRight(40, 19.0);
+
+        // Go straight
+        move_forward(50, 1.0);
+    }
+
+    // Adjust heading
+    RPS_Angle(180.0);
+
+    // Store current location
+    X_coord = RPS.X();
+    Y_coord = RPS.Y();
+
+    // Go forward
+    move_forward(50, 3.0);
+
+    // Adjust x-location
+    RPS_X(X_coord, -1.0);
+
+    Sleep(1000);
+
+    // Drop token
+    token_servo.SetDegree(150.0);
+    Sleep(1000);
+    token_servo.SetDegree(90.0);
 }
 
 void doFoosball() {
@@ -418,14 +496,18 @@ void finish() {
 
 }
 
-int main()
-{
+void initialize(){
     // min for lever servo: 725
     // max for lever servo: 2468
     // min for token servo: 514
     // max for token servo: 2430
 
     RPS.InitializeTouchMenu();
+
+    //Initialize the screen
+    LCD.Clear(BLACK);
+    LCD.SetFontColor(WHITE);
+    LCD.WriteLine("Initializing...");
 
     lever_servo.SetMin(725);
     lever_servo.SetMax(2468);
@@ -436,7 +518,15 @@ int main()
     lever_servo.SetDegree(90);
     token_servo.SetDegree(90);
     Sleep(1000);
-    doToken();
 
+    LCD.Clear();
+    LCD.WriteLine("Ready!!!");
+
+    Sleep(3000);
+}
+
+int main() {
+    initialize();   // Run through startup sequence
+    doToken();      // Execute the token task
 }
 
