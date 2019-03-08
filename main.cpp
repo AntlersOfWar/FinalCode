@@ -213,7 +213,7 @@ void turnRight(int percent, float degrees) {
     br_motor.Stop();
 }
 
-void RPS_X(float startX, float inches) {
+void RPS_Xinc(float startX, float inches) {
     if (RPS.X() < startX + (inches - 0.2)) {
         LCD.Clear();
         LCD.WriteLine("Too short!");
@@ -249,7 +249,43 @@ void RPS_X(float startX, float inches) {
     }
 }
 
-void RPS_Y(float startY, float inches) {
+void RPS_Xdec(float startX, float inches) {
+    if (RPS.X() > startX + (inches - 0.2)) {
+        LCD.Clear();
+        LCD.WriteLine("Too short!");
+        bl_motor.SetPercent(30);
+        fr_motor.SetPercent(-30);
+        fl_motor.SetPercent(30);
+        br_motor.SetPercent(-30);
+        while (RPS.X() > startX + inches) {
+            LCD.WriteRC(RPS.X(),2,12);
+            LCD.WriteRC(RPS.Y(),3,12);
+            LCD.WriteRC(RPS.Heading(),4,12);
+        }
+        bl_motor.Stop();
+        fr_motor.Stop();
+        fl_motor.Stop();
+        br_motor.Stop();
+    } else if (RPS.X() < startX + (inches + 0.2)) {
+        LCD.Clear();
+        LCD.WriteLine("Too far!");
+        bl_motor.SetPercent(-30);
+        fr_motor.SetPercent(30);
+        fl_motor.SetPercent(-30);
+        br_motor.SetPercent(30);
+        while (RPS.X() < startX + inches) {
+            LCD.WriteRC(RPS.X(),2,12);
+            LCD.WriteRC(RPS.Y(),3,12);
+            LCD.WriteRC(RPS.Heading(),4,12);
+        }
+        bl_motor.Stop();
+        fr_motor.Stop();
+        fl_motor.Stop();
+        br_motor.Stop();
+    }
+}
+
+void RPS_Yinc(float startY, float inches) {
     if (RPS.Y() < startY + (inches - 0.2)) {
         LCD.Clear();
         LCD.WriteLine("Too short!");
@@ -285,16 +321,15 @@ void RPS_Y(float startY, float inches) {
     }
 }
 
-void RPS_Angle(float desiredDeg) {
-    if (desiredDeg > 1.0) {
-    if (RPS.Heading() < desiredDeg - 1.0) {
+void RPS_Ydec(float startY, float inches) {
+    if (RPS.Y() > startY + (inches - 0.2)) {
         LCD.Clear();
-        LCD.WriteLine("Angle short!");
-        bl_motor.SetPercent(-30);
+        LCD.WriteLine("Too short!");
+        bl_motor.SetPercent(30);
         fr_motor.SetPercent(-30);
-        fl_motor.SetPercent(-30);
+        fl_motor.SetPercent(30);
         br_motor.SetPercent(-30);
-        while (RPS.Heading() < desiredDeg) {
+        while (RPS.Y() > startY + inches) {
             LCD.WriteRC(RPS.X(),2,12);
             LCD.WriteRC(RPS.Y(),3,12);
             LCD.WriteRC(RPS.Heading(),4,12);
@@ -303,14 +338,14 @@ void RPS_Angle(float desiredDeg) {
         fr_motor.Stop();
         fl_motor.Stop();
         br_motor.Stop();
-    } else if (RPS.Heading() > desiredDeg + 1.0) {
+    } else if (RPS.Y() < startY + (inches + 0.2)) {
         LCD.Clear();
-        LCD.WriteLine("Angle over!");
-        bl_motor.SetPercent(30);
+        LCD.WriteLine("Too far!");
+        bl_motor.SetPercent(-30);
         fr_motor.SetPercent(30);
-        fl_motor.SetPercent(30);
+        fl_motor.SetPercent(-30);
         br_motor.SetPercent(30);
-        while (RPS.Heading() > desiredDeg) {
+        while (RPS.Y() < startY + inches) {
             LCD.WriteRC(RPS.X(),2,12);
             LCD.WriteRC(RPS.Y(),3,12);
             LCD.WriteRC(RPS.Heading(),4,12);
@@ -320,41 +355,147 @@ void RPS_Angle(float desiredDeg) {
         fl_motor.Stop();
         br_motor.Stop();
     }
-    } else {
-        if (RPS.Heading() > 270.0 && RPS.Heading() < 359.9) {
+}
+
+// Adjusts the robot heading according to the desired RPS angle
+void RPS_Angle(float desiredDeg) {
+    // If desired heading is zero degrees, go to next task
+    if (desiredDeg > 1.0) {
+        // If robot heading is below desired value
+        if (RPS.Heading() < desiredDeg - 1.0) {
             LCD.Clear();
             LCD.WriteLine("Angle short!");
+
+            // Turn left
             bl_motor.SetPercent(-30);
             fr_motor.SetPercent(-30);
             fl_motor.SetPercent(-30);
             br_motor.SetPercent(-30);
-            while (RPS.Heading() > 2.0) {
+
+            // Loop until heading is desired angle
+            while (RPS.Heading() < desiredDeg) {
+                // Write RPS values to the screen
                 LCD.WriteRC(RPS.X(),2,12);
                 LCD.WriteRC(RPS.Y(),3,12);
                 LCD.WriteRC(RPS.Heading(),4,12);
             }
-            bl_motor.Stop();
-            fr_motor.Stop();
-            fl_motor.Stop();
-            br_motor.Stop();
-        } else if (RPS.Heading() < 90.0 && RPS.Heading() > 0.1) {
-            LCD.Clear();
-            LCD.WriteLine("Angle over!");
-            bl_motor.SetPercent(30);
-            fr_motor.SetPercent(30);
-            fl_motor.SetPercent(30);
-            br_motor.SetPercent(30);
-            while (RPS.Heading() < 358.0) {
-                LCD.WriteRC(RPS.X(),2,12);
-                LCD.WriteRC(RPS.Y(),3,12);
-                LCD.WriteRC(RPS.Heading(),4,12);
-            }
+            // Stop motors
             bl_motor.Stop();
             fr_motor.Stop();
             fl_motor.Stop();
             br_motor.Stop();
         }
+        // If robot heading is above desired value
+        else if (RPS.Heading() > desiredDeg + 1.0) {
+            LCD.Clear();
+            LCD.WriteLine("Angle over!");
 
+            // Turn right
+            bl_motor.SetPercent(30);
+            fr_motor.SetPercent(30);
+            fl_motor.SetPercent(30);
+            br_motor.SetPercent(30);
+
+            // Loop until heading is desired angle
+            while (RPS.Heading() > desiredDeg) {
+                // Write RPS values to the screen
+                LCD.WriteRC(RPS.X(),2,12);
+                LCD.WriteRC(RPS.Y(),3,12);
+                LCD.WriteRC(RPS.Heading(),4,12);
+            }
+            // Stop motors
+            bl_motor.Stop();
+            fr_motor.Stop();
+            fl_motor.Stop();
+            br_motor.Stop();
+        }
+    }
+    // Run this task if the desired heading is zero degrees
+    else {
+        // If robot is angled below the positive x-axis (4th quadrant)
+        if (RPS.Heading() > 270.0 && RPS.Heading() < 359.9) {
+            LCD.Clear();
+            LCD.WriteLine("Angle short!");
+
+            // Turn left
+            bl_motor.SetPercent(-30);
+            fr_motor.SetPercent(-30);
+            fl_motor.SetPercent(-30);
+            br_motor.SetPercent(-30);
+
+            // While the robot has a large angle (flips to 0.0 degrees after reaching 359.9 degrees)
+            while (RPS.Heading() > 2.0) {
+                // Write RPS values to the screen
+                LCD.WriteRC(RPS.X(),2,12);
+                LCD.WriteRC(RPS.Y(),3,12);
+                LCD.WriteRC(RPS.Heading(),4,12);
+            }
+            // Stop motors
+            bl_motor.Stop();
+            fr_motor.Stop();
+            fl_motor.Stop();
+            br_motor.Stop();
+        }
+        // If robot is angled above the positive x-axis (1st quadrant)
+        else if (RPS.Heading() < 90.0 && RPS.Heading() > 0.1) {
+            LCD.Clear();
+            LCD.WriteLine("Angle over!");
+
+            // Turn left
+            bl_motor.SetPercent(30);
+            fr_motor.SetPercent(30);
+            fl_motor.SetPercent(30);
+            br_motor.SetPercent(30);
+
+            // While the robot has a small angle (flips to 359.9 degrees after reaching 0.0 degrees)
+            while (RPS.Heading() < 358.0) {
+                // Write RPS values to the screen
+                LCD.WriteRC(RPS.X(),2,12);
+                LCD.WriteRC(RPS.Y(),3,12);
+                LCD.WriteRC(RPS.Heading(),4,12);
+            }
+            // Stop motors
+            bl_motor.Stop();
+            fr_motor.Stop();
+            fl_motor.Stop();
+            br_motor.Stop();
+        }
+    }
+}
+
+void RPS_X_dec_abs(float inches) {
+    if (RPS.X() > (inches - 0.2)) {
+        LCD.Clear();
+        LCD.WriteLine("Too short!");
+        bl_motor.SetPercent(30);
+        fr_motor.SetPercent(-30);
+        fl_motor.SetPercent(30);
+        br_motor.SetPercent(-30);
+        while (RPS.X() > inches) {
+            LCD.WriteRC(RPS.X(),2,12);
+            LCD.WriteRC(RPS.Y(),3,12);
+            LCD.WriteRC(RPS.Heading(),4,12);
+        }
+        bl_motor.Stop();
+        fr_motor.Stop();
+        fl_motor.Stop();
+        br_motor.Stop();
+    } else if (RPS.X() < (inches + 0.2)) {
+        LCD.Clear();
+        LCD.WriteLine("Too far!");
+        bl_motor.SetPercent(-30);
+        fr_motor.SetPercent(30);
+        fl_motor.SetPercent(-30);
+        br_motor.SetPercent(30);
+        while (RPS.X() < inches) {
+            LCD.WriteRC(RPS.X(),2,12);
+            LCD.WriteRC(RPS.Y(),3,12);
+            LCD.WriteRC(RPS.Heading(),4,12);
+        }
+        bl_motor.Stop();
+        fr_motor.Stop();
+        fl_motor.Stop();
+        br_motor.Stop();
     }
 }
 
@@ -405,11 +546,11 @@ void doToken() {
     move_forward(50, 17.0);
 
     // Adjust x-location
-    RPS_X(X_coord, 16.0 + QR_OFFSET);
+    RPS_Xinc(X_coord, 16.0 + QR_OFFSET);
 
     // Press RPS button
-    lever_servo.SetDegree(0.0);
-    Sleep(4000);
+    lever_servo.SetDegree(10.0);
+    Sleep(5000);
     lever_servo.SetDegree(90.0);
 
     // Move backward
@@ -432,7 +573,7 @@ void doToken() {
     turnLeft(40, 65.0);
 
     // Adjust heading
-    RPS_Angle(85.0);
+    RPS_Angle(88.0);
 
     // Store current location
     X_coord = RPS.X();
@@ -441,11 +582,14 @@ void doToken() {
     // Go straight
     move_forward(80, 23.0);
 
+    // Adjust heading
+    RPS_Angle(90.0);
+
     // Go straight
     move_forward(50, 23.0);
 
     // Adjust y-location
-    RPS_Y(Y_coord, 46.0 + QR_OFFSET);
+    RPS_Yinc(Y_coord, 45.0 + QR_OFFSET);
 
     // Adjust heading
     RPS_Angle(90.0);
@@ -454,7 +598,7 @@ void doToken() {
     turnLeft(40, 121.0);
 
     // Adjust heading
-    RPS_Angle(236.0);
+    RPS_Angle(235.0);
 
     // Go forward
     move_forward(50, 26.0);
@@ -464,28 +608,56 @@ void doToken() {
         turnRight(40, 19.0);
 
         // Go straight
-        move_forward(50, 1.0);
+        move_forward(50, 1.5);
     }
 
     // Adjust heading
     RPS_Angle(180.0);
 
+    /*
     // Store current location
     X_coord = RPS.X();
     Y_coord = RPS.Y();
 
     // Go forward
-    move_forward(50, 3.0);
+    move_forward(50, 3.0);*/
 
-    // Adjust x-location
-    RPS_X(X_coord, -1.0);
+    // Adjust x-location in reference to absolute coordinates
+    RPS_X_dec_abs(11.0);
 
     Sleep(1000);
 
     // Drop token
-    token_servo.SetDegree(150.0);
+    token_servo.SetDegree(167.0);
     Sleep(1000);
     token_servo.SetDegree(90.0);
+    Sleep(500);
+
+    for(int i = 1; i < 4; i++){
+        // Turn right
+        turnRight(40, 30.0);
+
+        // Go straight
+        move_forward(50, 2.0);
+    }
+
+    // Go straight
+    move_forward(50, 11.0);
+
+    // Turn right
+    turnRight(40, 120.0);
+
+    // Move arm down
+    lever_servo.SetDegree(160.0);
+
+    // Turn right
+    turnRight(40, 120.0);
+
+    // Move arm up
+    lever_servo.SetDegree(90.0);
+
+    // Go straight
+    move_forward(80, 35.0);
 }
 
 void doFoosball() {
