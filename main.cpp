@@ -517,18 +517,14 @@ void waitForLight() {
  */
 
 void doDDR() {
-    waitForLight();
 
 }
 
 void doLever() {
-    waitForLight();
+
 }
 
 void doToken() {
-    // Wait for LED to turn red
-    waitForLight();
-
     // Go straight
     move_forward(50, 2.8);
 
@@ -572,17 +568,17 @@ void doToken() {
     // Turn left
     turnLeft(40, 65.0);
 
-    // Adjust heading
+    // Face towards acrylic ramp
     RPS_Angle(88.0);
 
     // Store current location
     X_coord = RPS.X();
     Y_coord = RPS.Y();
 
-    // Go straight
+    // Move forward to top of course
     move_forward(80, 23.0);
 
-    // Adjust heading
+    // Adjust heading on the ramp
     RPS_Angle(90.0);
 
     // Go straight
@@ -661,7 +657,81 @@ void doToken() {
 }
 
 void doFoosball() {
-    waitForLight();
+    // Go straight
+    move_forward(50, 2.8);
+
+    // Turn right
+    turnRight(40, 50.0);
+
+    // Adjust heading
+    RPS_Angle(3.0);
+
+    // Store current location
+    X_coord = RPS.X();
+    Y_coord = RPS.Y();
+
+    // Go straight
+    move_forward(50, 17.0);
+
+    // Adjust x-location
+    RPS_Xinc(X_coord, 16.0 + QR_OFFSET);
+
+    // Press RPS button
+    lever_servo.SetDegree(10.0);
+    Sleep(5000);
+    lever_servo.SetDegree(90.0);
+
+    // Move backward
+    move_backward(50, 1.0);
+
+    // Turn left
+    turnLeft(40, 20.0);
+
+    // Adjust heading
+    RPS_Angle(20.0);
+
+    // Store current location
+    X_coord = RPS.X();
+    Y_coord = RPS.Y();
+
+    // Go straight
+    move_forward(50, 1.0);
+
+    // Turn left
+    turnLeft(40, 65.0);
+
+    // Face towards acrylic ramp
+    RPS_Angle(88.0);
+
+    // Store current location
+    X_coord = RPS.X();
+    Y_coord = RPS.Y();
+
+    // Move forward to top of course
+    move_forward(80, 23.0);
+
+    // Adjust heading on the ramp
+    RPS_Angle(90.0);
+
+    // Go straight
+    move_forward(50, 23.0);
+
+    // Adjust y-location
+    RPS_Yinc(Y_coord, 45.0 + QR_OFFSET);
+
+    turnRight(40, 80.0);
+
+    RPS_Angle(3.0);
+
+    lever_servo.SetDegree(160.0);
+
+    X_coord = RPS.X();
+    Y_coord = RPS.Y();
+    move_backward(50,12.0);
+
+    RPS_Xdec(X_coord, -12.0);
+
+
 }
 
 void finish() {
@@ -699,6 +769,7 @@ void initialize(){
 
 int main() {
     initialize();   // Run through startup sequence
+    waitForLight(); // Wait for start light
     doToken();      // Execute the token task
 }
 
