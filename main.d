@@ -14,7 +14,13 @@
  C:\fehqt\Proteus/EWL/EWL_C/include/ewl_lib_ext1.h Libraries/FEHUtility.h \
  Startup/derivative.h Libraries/LCDColors.h Libraries/FEHIO.h \
  Drivers/adc16.h Libraries/FEHMotor.h Libraries/FEHRPS.h \
- Drivers/FEHXBee.h Libraries/FEHServo.h
+ Drivers/FEHXBee.h Libraries/FEHServo.h Libraries/FEHSD.h Drivers/SDHC.h \
+ Drivers/diskio.h Drivers/ff.h \
+ C:\fehqt\Proteus/EWL/EWL_C/include/stdarg.h \
+ C:\fehqt\Proteus/EWL/EWL_C/include/cstdarg \
+ C:\fehqt\Proteus/EWL/EWL_C/include/va_list.h \
+ C:\fehqt\Proteus/EWL/EWL_C/include/arm/stdarg.ARM.h Drivers/ffconf.h \
+ Drivers/ffconf.h Drivers/diskio.h
 
 C:\fehqt\Proteus/EWL/EWL_C++/include/lib_ewl_c++.prefix:
 
@@ -65,3 +71,25 @@ Libraries/FEHRPS.h:
 Drivers/FEHXBee.h:
 
 Libraries/FEHServo.h:
+
+Libraries/FEHSD.h:
+
+Drivers/SDHC.h:
+
+Drivers/diskio.h:
+
+Drivers/ff.h:
+
+C:\fehqt\Proteus/EWL/EWL_C/include/stdarg.h:
+
+C:\fehqt\Proteus/EWL/EWL_C/include/cstdarg:
+
+C:\fehqt\Proteus/EWL/EWL_C/include/va_list.h:
+
+C:\fehqt\Proteus/EWL/EWL_C/include/arm/stdarg.ARM.h:
+
+Drivers/ffconf.h:
+
+Drivers/ffconf.h:
+
+Drivers/diskio.h:

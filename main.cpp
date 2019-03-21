@@ -360,7 +360,7 @@ void RPS_Ydec(float startY, float inches) {
 // Adjusts the robot heading according to the desired RPS angle
 void RPS_Angle(float desiredDeg) {
     // If desired heading is zero degrees, go to next task
-    if (desiredDeg > 1.0) {
+    if (desiredDeg > 5.0) {
         // If robot heading is below desired value
         if (RPS.Heading() < desiredDeg - 1.0) {
             LCD.Clear();
@@ -661,7 +661,7 @@ void doFoosball() {
     move_forward(50, 2.8);
 
     // Turn right
-    turnRight(40, 50.0);
+    turnRight(40, 40.0);
 
     // Adjust heading
     RPS_Angle(3.0);
@@ -700,6 +700,8 @@ void doFoosball() {
     // Turn left
     turnLeft(40, 65.0);
 
+    Sleep(100);
+
     // Face towards acrylic ramp
     RPS_Angle(88.0);
 
@@ -710,28 +712,58 @@ void doFoosball() {
     // Move forward to top of course
     move_forward(80, 23.0);
 
+    Sleep(500);
+
     // Adjust heading on the ramp
-    RPS_Angle(90.0);
+    RPS_Angle(89.0);
 
     // Go straight
     move_forward(50, 23.0);
 
     // Adjust y-location
-    RPS_Yinc(Y_coord, 45.0 + QR_OFFSET);
+    RPS_Yinc(Y_coord, 47.0 + QR_OFFSET);
 
-    turnRight(40, 80.0);
+    // Adjust heading
+    RPS_Angle(90.0);
 
-    RPS_Angle(3.0);
+    // Turn right
+    turnRight(50, 100);
 
-    lever_servo.SetDegree(160.0);
+    // Adjust heading
+    RPS_Angle(15.0);
 
+    // Go straight
+    move_forward(50, 5.0);
+
+    Sleep(1000);
+
+    // Go straight
+    move_backward(50, 0.5);
+
+    // Grab foosball rings
+    lever_servo.SetDegree(172.0);
+
+    // Store current location
     X_coord = RPS.X();
     Y_coord = RPS.Y();
-    move_backward(50,12.0);
 
-    RPS_Xdec(X_coord, -12.0);
+    // Go straight
+    move_backward(30, 6.0);
 
+    // Raise lever arm
+    lever_servo.SetDegree(90.0);
 
+    // Go straight
+    move_forward(50, 2.0);
+
+    // Grab foosball rings
+    lever_servo.SetDegree(172.0);
+
+    // Go straight
+    move_backward(50, 6.0);
+
+    // Raise lever arm
+    lever_servo.SetDegree(90.0);
 }
 
 void finish() {
@@ -770,6 +802,6 @@ void initialize(){
 int main() {
     initialize();   // Run through startup sequence
     waitForLight(); // Wait for start light
-    doToken();      // Execute the token task
+    doFoosball();      // Execute the foosball task
 }
 
