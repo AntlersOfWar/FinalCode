@@ -726,11 +726,41 @@ void doFoosball() {
     // Adjust heading
     RPS_Angle(90.0);
 
+    Sleep(250);
+
     // Turn right
-    turnRight(50, 100);
+    turnRight(50, 20.0);
+
+    Sleep(250);
+
+    move_backward(40, 1.5);
+
+    Sleep(250);
+
+    turnRight(50, 30.0);
+
+    move_forward(30, 1.5);
+
+    turnRight(50, 25.0);
+
+    move_forward(50, 1.5);
+
+    turnRight(50, 10.0);
+
+    move_forward(50, 2.0);
+
+    turnRight(50, 25.0);
+
+    move_backward(50, 3.0);
+
+    RPS_Angle(10.0);
+
+    move_forward(50, 4.0);
 
     // Adjust heading
-    RPS_Angle(15.0);
+    RPS_Angle(10.0);
+
+    Sleep(250);
 
     // Go straight
     move_forward(50, 5.0);
@@ -754,13 +784,13 @@ void doFoosball() {
     lever_servo.SetDegree(90.0);
 
     // Go straight
-    move_forward(50, 2.0);
+    move_forward(50, 2.5);
 
     // Grab foosball rings
     lever_servo.SetDegree(172.0);
 
     // Go straight
-    move_backward(50, 6.0);
+    move_backward(50, 5.0);
 
     // Raise lever arm
     lever_servo.SetDegree(90.0);
