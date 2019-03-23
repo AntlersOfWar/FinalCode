@@ -322,7 +322,7 @@ void RPS_Yinc(float startY, float inches) {
 }
 
 void RPS_Ydec(float startY, float inches) {
-    if (RPS.Y() > startY + (inches - 0.2)) {
+    if (RPS.Y() > startY - (inches + 0.2)) {
         LCD.Clear();
         LCD.WriteLine("Too short!");
         bl_motor.SetPercent(30);
@@ -338,7 +338,7 @@ void RPS_Ydec(float startY, float inches) {
         fr_motor.Stop();
         fl_motor.Stop();
         br_motor.Stop();
-    } else if (RPS.Y() < startY + (inches + 0.2)) {
+    } else if (RPS.Y() < startY - (inches - 0.2)) {
         LCD.Clear();
         LCD.WriteLine("Too far!");
         bl_motor.SetPercent(-30);
@@ -378,6 +378,22 @@ void RPS_Angle(float desiredDeg) {
                 LCD.WriteRC(RPS.X(),2,12);
                 LCD.WriteRC(RPS.Y(),3,12);
                 LCD.WriteRC(RPS.Heading(),4,12);
+
+                // Wait until signal is regained if lost
+                if (RPS.X() < 0){
+                    // Stop motors
+                    bl_motor.Stop();
+                    fr_motor.Stop();
+                    fl_motor.Stop();
+                    br_motor.Stop();
+                    // Wait
+                    while(RPS.X() < 0);
+                    // Restart motors
+                    bl_motor.SetPercent(-30);
+                    fr_motor.SetPercent(-30);
+                    fl_motor.SetPercent(-30);
+                    br_motor.SetPercent(-30);
+                }
             }
             // Stop motors
             bl_motor.Stop();
@@ -402,6 +418,22 @@ void RPS_Angle(float desiredDeg) {
                 LCD.WriteRC(RPS.X(),2,12);
                 LCD.WriteRC(RPS.Y(),3,12);
                 LCD.WriteRC(RPS.Heading(),4,12);
+
+                // Wait until signal is regained if lost
+                if (RPS.X() < 0){
+                    // Stop motors
+                    bl_motor.Stop();
+                    fr_motor.Stop();
+                    fl_motor.Stop();
+                    br_motor.Stop();
+                    // Wait
+                    while(RPS.X() < 0);
+                    // Restart motors
+                    bl_motor.SetPercent(-30);
+                    fr_motor.SetPercent(-30);
+                    fl_motor.SetPercent(-30);
+                    br_motor.SetPercent(-30);
+                }
             }
             // Stop motors
             bl_motor.Stop();
@@ -429,6 +461,22 @@ void RPS_Angle(float desiredDeg) {
                 LCD.WriteRC(RPS.X(),2,12);
                 LCD.WriteRC(RPS.Y(),3,12);
                 LCD.WriteRC(RPS.Heading(),4,12);
+
+                // Wait until signal is regained if lost
+                if (RPS.X() < 0){
+                    // Stop motors
+                    bl_motor.Stop();
+                    fr_motor.Stop();
+                    fl_motor.Stop();
+                    br_motor.Stop();
+                    // Wait
+                    while(RPS.X() < 0);
+                    // Restart motors
+                    bl_motor.SetPercent(-30);
+                    fr_motor.SetPercent(-30);
+                    fl_motor.SetPercent(-30);
+                    br_motor.SetPercent(-30);
+                }
             }
             // Stop motors
             bl_motor.Stop();
@@ -453,6 +501,22 @@ void RPS_Angle(float desiredDeg) {
                 LCD.WriteRC(RPS.X(),2,12);
                 LCD.WriteRC(RPS.Y(),3,12);
                 LCD.WriteRC(RPS.Heading(),4,12);
+
+                // Wait until signal is regained if lost
+                if (RPS.X() < 0){
+                    // Stop motors
+                    bl_motor.Stop();
+                    fr_motor.Stop();
+                    fl_motor.Stop();
+                    br_motor.Stop();
+                    // Wait
+                    while(RPS.X() < 0);
+                    // Restart motors
+                    bl_motor.SetPercent(-30);
+                    fr_motor.SetPercent(-30);
+                    fl_motor.SetPercent(-30);
+                    br_motor.SetPercent(-30);
+                }
             }
             // Stop motors
             bl_motor.Stop();
@@ -721,7 +785,7 @@ void doFoosball() {
     move_forward(50, 23.0);
 
     // Adjust y-location
-    RPS_Yinc(Y_coord, 47.0 + QR_OFFSET);
+    RPS_Yinc(Y_coord, 46.5 + QR_OFFSET);
 
     // Adjust heading
     RPS_Angle(90.0);
@@ -733,37 +797,33 @@ void doFoosball() {
 
     Sleep(250);
 
-    move_backward(40, 1.5);
+    // Go straight
+    move_backward(40, 2.5);
 
     Sleep(250);
 
+    // Turn right
     turnRight(50, 30.0);
 
+    // Go straight
     move_forward(30, 1.5);
 
+    // Turn right
     turnRight(50, 25.0);
 
+    // Go straight
     move_forward(50, 1.5);
 
+    // Turn right
     turnRight(50, 10.0);
 
+    // Go straight
     move_forward(50, 2.0);
-
-    turnRight(50, 25.0);
-
-    move_backward(50, 3.0);
-
-    RPS_Angle(10.0);
-
-    move_forward(50, 4.0);
-
-    // Adjust heading
-    RPS_Angle(10.0);
 
     Sleep(250);
 
     // Go straight
-    move_forward(50, 5.0);
+    move_forward(60, 1.0);
 
     Sleep(1000);
 
@@ -771,7 +831,7 @@ void doFoosball() {
     move_backward(50, 0.5);
 
     // Grab foosball rings
-    lever_servo.SetDegree(172.0);
+    lever_servo.SetDegree(173.0);
 
     // Store current location
     X_coord = RPS.X();
@@ -787,13 +847,55 @@ void doFoosball() {
     move_forward(50, 2.5);
 
     // Grab foosball rings
-    lever_servo.SetDegree(172.0);
+    lever_servo.SetDegree(173.0);
 
     // Go straight
-    move_backward(50, 5.0);
+    move_backward(30, 6.0);
 
     // Raise lever arm
     lever_servo.SetDegree(90.0);
+
+    // Turn right
+    turnRight(40, 15.0);
+
+    // Adjust angle
+    RPS_Angle(345.0);
+
+    // Go straight
+    move_forward(50, 7.0);
+
+    // Turn right
+    turnRight(40, 45.0);
+
+    // Adjust angle
+    RPS_Angle(270.0);
+
+    // Store current location
+    X_coord = RPS.X();
+    Y_coord = RPS.Y();
+
+    // Move forward to bottom of course
+    move_forward(80, 23.0);
+
+    Sleep(500);
+
+    // Adjust heading on the ramp
+    RPS_Angle(270.0);
+
+    // Go straight
+    move_forward(50, 23.0);
+
+    // Adjust y-location
+    RPS_Ydec(Y_coord, 46.0 + QR_OFFSET);
+
+    // Turn left
+    turnRight(40, 80.0);
+
+    // Adjust angle
+    RPS_Angle(170.0);
+
+    // Go straight
+    move_forward(50, 24.0);
 }
 
 void finish() {
