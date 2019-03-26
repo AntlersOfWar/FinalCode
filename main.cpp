@@ -774,7 +774,7 @@ void doFoosball() {
     Y_coord = RPS.Y();
 
     // Move forward to top of course
-    move_forward(80, 23.0);
+    move_forward(80, 24.0);
 
     Sleep(500);
 
@@ -782,7 +782,7 @@ void doFoosball() {
     RPS_Angle(89.0);
 
     // Go straight
-    move_forward(50, 23.0);
+    move_forward(50, 22.0);
 
     // Adjust y-location
     RPS_Yinc(Y_coord, 46.5 + QR_OFFSET);
@@ -793,7 +793,7 @@ void doFoosball() {
     Sleep(250);
 
     // Turn right
-    turnRight(50, 20.0);
+    turnRight(50, 30.0);
 
     Sleep(250);
 
@@ -803,27 +803,21 @@ void doFoosball() {
     Sleep(250);
 
     // Turn right
-    turnRight(50, 30.0);
+    turnRight(50, 35.0);
 
     // Go straight
     move_forward(30, 1.5);
 
     // Turn right
-    turnRight(50, 25.0);
+    turnRight(50, 30.0);
 
     // Go straight
-    move_forward(50, 1.5);
-
-    // Turn right
-    turnRight(50, 10.0);
-
-    // Go straight
-    move_forward(50, 2.0);
+    move_forward(50, 3.5);
 
     Sleep(250);
 
     // Go straight
-    move_forward(60, 1.0);
+    move_forward(60, 2.0);
 
     Sleep(1000);
 
@@ -838,19 +832,31 @@ void doFoosball() {
     Y_coord = RPS.Y();
 
     // Go straight
-    move_backward(30, 6.0);
+    move_backward(30, 5.0);
 
     // Raise lever arm
     lever_servo.SetDegree(90.0);
 
     // Go straight
-    move_forward(50, 2.5);
+    move_forward(50, 1.5);
 
     // Grab foosball rings
     lever_servo.SetDegree(173.0);
 
     // Go straight
-    move_backward(30, 6.0);
+    move_backward(30, 5.0);
+
+    // Raise lever arm
+    lever_servo.SetDegree(90.0);
+
+    // Go straight
+    move_forward(50, 1.5);
+
+    // Grab foosball rings
+    lever_servo.SetDegree(173.0);
+
+    // Go straight
+    move_backward(50, 5.0);
 
     // Raise lever arm
     lever_servo.SetDegree(90.0);
@@ -862,10 +868,16 @@ void doFoosball() {
     RPS_Angle(345.0);
 
     // Go straight
-    move_forward(50, 7.0);
+    move_forward(50, 6.0);
 
     // Turn right
-    turnRight(40, 45.0);
+    turnRight(40, 55.0);
+
+    // Go straight
+    move_forward(50, 1.5);
+
+    // Turn right
+    turnRight(40, 25.0);
 
     // Adjust angle
     RPS_Angle(270.0);
@@ -883,19 +895,19 @@ void doFoosball() {
     RPS_Angle(270.0);
 
     // Go straight
-    move_forward(50, 23.0);
+    move_forward(50, 18.0);
 
     // Adjust y-location
-    RPS_Ydec(Y_coord, 46.0 + QR_OFFSET);
+    RPS_Ydec(Y_coord, -41.0 - QR_OFFSET);
 
     // Turn left
     turnRight(40, 80.0);
 
     // Adjust angle
-    RPS_Angle(170.0);
+    RPS_Angle(200.0);
 
     // Go straight
-    move_forward(50, 24.0);
+    move_forward(50, 40.0);
 }
 
 void finish() {
@@ -923,12 +935,12 @@ void initialize(){
 
     lever_servo.SetDegree(90);
     token_servo.SetDegree(90);
-    Sleep(1000);
+    Sleep(100);
 
     LCD.Clear();
     LCD.WriteLine("Ready!!!");
 
-    Sleep(3000);
+    Sleep(1000);
 }
 
 int main() {
