@@ -12,6 +12,7 @@
 #define ROBOT_RADIUS 4.5
 #define QR_OFFSET 2.0
 #define RED_THRESH 0.7
+#define BLUE_THRESH 1.5
 float X_coord;
 float Y_coord;
 
@@ -59,6 +60,7 @@ int theoreticalDegree(float degrees) {
  */
 void move_forward(int percent, float inches) {
     //Reset all encoder counts
+    Sleep(100);
     fl_encoder.ResetCounts();
     br_encoder.ResetCounts();
     Sleep(100);
@@ -91,6 +93,7 @@ void move_forward(int percent, float inches) {
     fr_motor.Stop();
     fl_motor.Stop();
     br_motor.Stop();
+    Sleep(100);
 }
 
 /*
@@ -99,6 +102,7 @@ void move_forward(int percent, float inches) {
  */
 void move_backward(int percent, float inches) {
     //Reset all encoder counts
+    Sleep(100);
     fl_encoder.ResetCounts();
     br_encoder.ResetCounts();
     Sleep(100);
@@ -131,6 +135,7 @@ void move_backward(int percent, float inches) {
     fr_motor.Stop();
     fl_motor.Stop();
     br_motor.Stop();
+    Sleep(100);
 }
 
 /*
@@ -139,6 +144,7 @@ void move_backward(int percent, float inches) {
  */
 void turnLeft(int percent, float degrees) {
     //Reset all encoder counts
+    Sleep(100);
     fl_encoder.ResetCounts();
     br_encoder.ResetCounts();
     Sleep(100);
@@ -171,6 +177,7 @@ void turnLeft(int percent, float degrees) {
     fr_motor.Stop();
     fl_motor.Stop();
     br_motor.Stop();
+    Sleep(100);
 }
 
 /*
@@ -179,6 +186,7 @@ void turnLeft(int percent, float degrees) {
  */
 void turnRight(int percent, float degrees) {
     //Reset all encoder counts
+    Sleep(100);
     fl_encoder.ResetCounts();
     br_encoder.ResetCounts();
     Sleep(100);
@@ -211,9 +219,16 @@ void turnRight(int percent, float degrees) {
     fr_motor.Stop();
     fl_motor.Stop();
     br_motor.Stop();
+    Sleep(100);
 }
 
+/*
+ * Given a reference point (@param startX) and the desired displacement (@param inches),
+ * moves robot in X direction to the location relative to the starting point.
+ * (if robot move_forward direction faces positive X)
+ */
 void RPS_Xinc(float startX, float inches) {
+    Sleep(100);
     if (RPS.X() < startX + (inches - 0.2)) {
         LCD.Clear();
         LCD.WriteLine("Too short!");
@@ -247,9 +262,16 @@ void RPS_Xinc(float startX, float inches) {
         fl_motor.Stop();
         br_motor.Stop();
     }
+    Sleep(100);
 }
 
+/*
+ * Given a reference point (@param startX) and the desired displacement (@param inches),
+ * moves robot in X direction to the location relative to the starting point.
+ * (if robot move_forward direction faces negative X)
+ */
 void RPS_Xdec(float startX, float inches) {
+    Sleep(100);
     if (RPS.X() > startX + (inches - 0.2)) {
         LCD.Clear();
         LCD.WriteLine("Too short!");
@@ -283,9 +305,16 @@ void RPS_Xdec(float startX, float inches) {
         fl_motor.Stop();
         br_motor.Stop();
     }
+    Sleep(100);
 }
 
+/*
+ * Given a reference point (@param startY) and the desired displacement (@param inches),
+ * moves robot in Y direction to the location relative to the starting point.
+ * (if robot move_forward direction faces positive Y)
+ */
 void RPS_Yinc(float startY, float inches) {
+    Sleep(100);
     if (RPS.Y() < startY + (inches - 0.2)) {
         LCD.Clear();
         LCD.WriteLine("Too short!");
@@ -319,9 +348,16 @@ void RPS_Yinc(float startY, float inches) {
         fl_motor.Stop();
         br_motor.Stop();
     }
+    Sleep(100);
 }
 
+/*
+ * Given a reference point (@param startY) and the desired displacement (@param inches),
+ * moves robot in Y direction to the location relative to the starting point.
+ * (if robot move_forward direction faces negative Y)
+ */
 void RPS_Ydec(float startY, float inches) {
+    Sleep(100);
     if (RPS.Y() > startY - (inches + 0.2)) {
         LCD.Clear();
         LCD.WriteLine("Too short!");
@@ -355,10 +391,15 @@ void RPS_Ydec(float startY, float inches) {
         fl_motor.Stop();
         br_motor.Stop();
     }
+    Sleep(100);
 }
 
-// Adjusts the robot heading according to the desired RPS angle
+/*
+ * Given a desired angle (@param desiredDeg), rotates the
+ * robot until desired angle is achieved.
+ */
 void RPS_Angle(float desiredDeg) {
+    Sleep(100);
     // If desired heading is zero degrees, go to next task
     if (desiredDeg > 5.0) {
         // If robot heading is below desired value
@@ -525,9 +566,16 @@ void RPS_Angle(float desiredDeg) {
             br_motor.Stop();
         }
     }
+    Sleep(100);
 }
 
+/*
+ * Given an absolute desired X position (@param inches),
+ * moves robot in X direction to that X position.
+ * (if robot move_forward direction faces negative X)
+ */
 void RPS_X_dec_abs(float inches) {
+    Sleep(100);
     if (RPS.X() > (inches - 0.2)) {
         LCD.Clear();
         LCD.WriteLine("Too short!");
@@ -561,8 +609,13 @@ void RPS_X_dec_abs(float inches) {
         fl_motor.Stop();
         br_motor.Stop();
     }
+    Sleep(100);
 }
 
+/*
+ * Function called at the beginning to start off based off the red start light,
+ * or if 30 seconds has passed.
+ */
 void waitForLight() {
 
     float time = TimeNow();
