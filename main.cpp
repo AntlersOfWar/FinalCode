@@ -398,6 +398,53 @@ void RPS_Ydec(float startY, float inches) {
  * Given a desired angle (@param desiredDeg), rotates the
  * robot until desired angle is achieved.
  */
+
+// This program aims to ensure the robot will always take the shortest path to the desired heading
+void RPS_Angle_new(float desiredDeg){
+    while(abs(desiredDeg - RPS.Heading()) > 0.5){
+        if(desiredDeg - RPS.Heading() > 180.0){ // Example: Robot going from Q1 to Q4
+            // turn the robot counterclockwise
+            bl_motor.SetPercent(-30);
+            fr_motor.SetPercent(-30);
+            fl_motor.SetPercent(-30);
+            br_motor.SetPercent(-30);
+        }
+        if(desiredDeg - RPS.Heading() < -180.0){ // Example: Robot going from Q3 to Q1
+            // turn the robot clockwise
+            bl_motor.SetPercent(30);
+            fr_motor.SetPercent(30);
+            fl_motor.SetPercent(30);
+            br_motor.SetPercent(30);
+        }
+        if(desiredDeg - RPS.Heading() > -180.0 && desiredDeg - RPS.Heading() < 0.0){ // Example: Robot going from Q3 to Q2
+            // turn the robot clockwise
+            bl_motor.SetPercent(30);
+            fr_motor.SetPercent(30);
+            fl_motor.SetPercent(30);
+            br_motor.SetPercent(30);
+        }
+        if(desiredDeg - RPS.Heading() > 0 && desiredDeg - RPS.Heading() < 180.0){ // Example: Robot going from Q1 to Q2
+            // turn the robot counterclockwise
+            bl_motor.SetPercent(-30);
+            fr_motor.SetPercent(-30);
+            fl_motor.SetPercent(-30);
+            br_motor.SetPercent(-30);
+        }
+        else{   // Just in case the difference is exactly 180.0 degrees
+            // turn the robot counterclockwise
+            bl_motor.SetPercent(-30);
+            fr_motor.SetPercent(-30);
+            fl_motor.SetPercent(-30);
+            br_motor.SetPercent(-30);
+        }
+    }
+    // Stop motors
+    bl_motor.Stop();
+    fr_motor.Stop();
+    fl_motor.Stop();
+    br_motor.Stop();
+}
+
 void RPS_Angle(float desiredDeg) {
     Sleep(100);
     // If desired heading is zero degrees, go to next task
