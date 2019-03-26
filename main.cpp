@@ -576,152 +576,48 @@ void waitForLight() {
 }
 
 /*
+ * Given a desired motor speed (@param percent), moves robot forward at that speed,
+ * toward the DDR floor lights. The CdS cell should go over these lights.
+ * Returns [red light was detected]
+ */
+bool checkDDRLight(int percent) {
+    Sleep(100);
+
+    //Set motors to desired percent. Some motors have to turn backwards, so make percent negative.
+    bl_motor.SetPercent(percent);
+    fr_motor.SetPercent(-1 * percent);
+    fl_motor.SetPercent(percent);
+    br_motor.SetPercent(-1 * percent);
+
+    bool lightFound = false;
+    bool redLight;
+    while (!lightFound) {
+        if (cds.Value() <= RED_THRESH) {
+            bl_motor.Stop();
+            fr_motor.Stop();
+            fl_motor.Stop();
+            br_motor.Stop();
+            lightFound = true;
+            redLight = true;
+        } else if (cds.Value() > RED_THRESH && cds.Value() <= BLUE_THRESH) {
+            bl_motor.Stop();
+            fr_motor.Stop();
+            fl_motor.Stop();
+            br_motor.Stop();
+            lightFound = true;
+            redLight = false;
+        }
+    }
+   return redLight;
+}
+
+/*
  * TODO: Fill in all the functions with appropriate movements. As of 3/6/19, all functions will do their respective task starting from the start.
  * Later on, only one of the functions (doDDR()) will have the waitForLight() function. The others will have to go off the previous task function called.
  */
 
 void doDDR() {
-
-}
-
-void doLever() {
-
-}
-
-void doToken() {
-    // Go straight
-    move_forward(50, 2.8);
-
-    // Turn right
-    turnRight(40, 50.0);
-
-    // Adjust heading
-    RPS_Angle(3.0);
-
-    // Store current location
-    X_coord = RPS.X();
-    Y_coord = RPS.Y();
-
-    // Go straight
-    move_forward(50, 17.0);
-
-    // Adjust x-location
-    RPS_Xinc(X_coord, 16.0 + QR_OFFSET);
-
-    // Press RPS button
-    lever_servo.SetDegree(10.0);
-    Sleep(5000);
-    lever_servo.SetDegree(90.0);
-
-    // Move backward
-    move_backward(50, 1.0);
-
-    // Turn left
-    turnLeft(40, 20.0);
-
-    // Adjust heading
-    RPS_Angle(20.0);
-
-    // Store current location
-    X_coord = RPS.X();
-    Y_coord = RPS.Y();
-
-    // Go straight
-    move_forward(50, 1.0);
-
-    // Turn left
-    turnLeft(40, 65.0);
-
-    // Face towards acrylic ramp
-    RPS_Angle(88.0);
-
-    // Store current location
-    X_coord = RPS.X();
-    Y_coord = RPS.Y();
-
-    // Move forward to top of course
-    move_forward(80, 23.0);
-
-    // Adjust heading on the ramp
-    RPS_Angle(90.0);
-
-    // Go straight
-    move_forward(50, 23.0);
-
-    // Adjust y-location
-    RPS_Yinc(Y_coord, 45.0 + QR_OFFSET);
-
-    // Adjust heading
-    RPS_Angle(90.0);
-
-    // Turn left
-    turnLeft(40, 121.0);
-
-    // Adjust heading
-    RPS_Angle(235.0);
-
-    // Go forward
-    move_forward(50, 26.0);
-
-    for(int i = 1; i < 4; i++){
-        // Turn right
-        turnRight(40, 19.0);
-
-        // Go straight
-        move_forward(50, 1.5);
-    }
-
-    // Adjust heading
-    RPS_Angle(180.0);
-
-    /*
-    // Store current location
-    X_coord = RPS.X();
-    Y_coord = RPS.Y();
-
-    // Go forward
-    move_forward(50, 3.0);*/
-
-    // Adjust x-location in reference to absolute coordinates
-    RPS_X_dec_abs(11.0);
-
-    Sleep(1000);
-
-    // Drop token
-    token_servo.SetDegree(167.0);
-    Sleep(1000);
-    token_servo.SetDegree(90.0);
-    Sleep(500);
-
-    for(int i = 1; i < 4; i++){
-        // Turn right
-        turnRight(40, 30.0);
-
-        // Go straight
-        move_forward(50, 2.0);
-    }
-
-    // Go straight
-    move_forward(50, 11.0);
-
-    // Turn right
-    turnRight(40, 120.0);
-
-    // Move arm down
-    lever_servo.SetDegree(160.0);
-
-    // Turn right
-    turnRight(40, 120.0);
-
-    // Move arm up
-    lever_servo.SetDegree(90.0);
-
-    // Go straight
-    move_forward(80, 35.0);
-}
-
-void doFoosball() {
-    // Go straight
+    // Start
     move_forward(50, 2.8);
 
     // Turn right
@@ -735,7 +631,16 @@ void doFoosball() {
     Y_coord = RPS.Y();
 
     // Go straight
-    move_forward(50, 17.0);
+    move_forward(50, 10.0); //move_forward(50, 17.0);
+
+    // Go straight and check for DDR light color (new as of 3/26)
+    bool redLight = checkDDRLight(20);
+
+    if (redLight) {
+        //hit red button
+    } else {
+        //hit blue button
+    }
 
     // Adjust x-location
     RPS_Xinc(X_coord, 16.0 + QR_OFFSET);
@@ -754,70 +659,239 @@ void doFoosball() {
     // Adjust heading
     RPS_Angle(20.0);
 
-    // Store current location
-    X_coord = RPS.X();
-    Y_coord = RPS.Y();
-
     // Go straight
     move_forward(50, 1.0);
 
     // Turn left
     turnLeft(40, 65.0);
 
-    Sleep(100);
-
     // Face towards acrylic ramp
     RPS_Angle(88.0);
+}
+
+void doLever() {
+        move_backward(50, 5.0);
+
+        turnLeft(40, 40.0);
+
+        /*
+         * TODO: Fill stuff in for lever, look at course and determine what needs to be done (instead of pushing it down, sweep it)
+         */
+
+        lever_servo.SetDegree(40.0);
+        Sleep(2000);
+
+        lever_servo.SetDegree(120.0);
+        Sleep(500);
+
+        turnRight(50, 130.0);
+
+        RPS_Angle(270.0);
+}
+
+void doToken() {
+
+    /*
+    // Go straight
+    move_forward(50, 2.8);
+    // Turn right
+    turnRight(40, 50.0);
+    // Adjust heading
+    RPS_Angle(3.0);
+    // Store current location
+    X_coord = RPS.X();
+    Y_coord = RPS.Y();
+    // Go straight
+    move_forward(50, 17.0);
+    // Adjust x-location
+    RPS_Xinc(X_coord, 16.0 + QR_OFFSET);
+    // Press RPS button
+    lever_servo.SetDegree(10.0);
+    Sleep(5000);
+    lever_servo.SetDegree(90.0);
+    // Move backward
+    move_backward(50, 1.0);
+    // Turn left
+    turnLeft(40, 20.0);
+    // Adjust heading
+    RPS_Angle(20.0);
+    // Store current location
+    X_coord = RPS.X();
+    Y_coord = RPS.Y();
+    // Go straight
+    move_forward(50, 1.0);
+    // Turn left
+    turnLeft(40, 65.0);
+    // Face towards acrylic ramp
+    RPS_Angle(88.0);
+    // Store current location
+    X_coord = RPS.X();
+    Y_coord = RPS.Y();
+    // Move forward to top of course
+    move_forward(80, 23.0);
+    // Adjust heading on the ramp
+    RPS_Angle(90.0);
+    // Go straight
+    move_forward(50, 23.0);
+    // Adjust y-location
+    RPS_Yinc(Y_coord, 45.0 + QR_OFFSET);
+    // Adjust heading
+    RPS_Angle(90.0);
+    // Turn left
+    turnLeft(40, 121.0);
+    // Adjust heading
+    RPS_Angle(235.0);
+    // Go forward
+    move_forward(50, 26.0);
+    for(int i = 1; i < 4; i++){
+        // Turn right
+        turnRight(40, 19.0);
+        // Go straight
+        move_forward(50, 1.5);
+    }
+    // Adjust heading
+    RPS_Angle(180.0);
+    // Store current location
+    X_coord = RPS.X();
+    Y_coord = RPS.Y();
+    // Go forward
+    move_forward(50, 3.0);
+    // Adjust x-location in reference to absolute coordinates
+    RPS_X_dec_abs(11.0);
+    Sleep(1000);
+    // Drop token
+    token_servo.SetDegree(167.0);
+    Sleep(1000);
+    token_servo.SetDegree(90.0);
+    Sleep(500);
+    for(int i = 1; i < 4; i++){
+        // Turn right
+        turnRight(40, 30.0);
+        // Go straight
+        move_forward(50, 2.0);
+    }
+    // Go straight
+    move_forward(50, 11.0);
+    // Turn right
+    turnRight(40, 120.0);
+    // Move arm down
+    lever_servo.SetDegree(160.0);
+    // Turn right
+    turnRight(40, 120.0);
+    // Move arm up
+    lever_servo.SetDegree(90.0);
+    // Go straight
+    move_forward(80, 35.0);
+    */
+
+    // Go straight, towards ramp, to try to align with token
+    move_forward(50, 10.0);
+
+    turnRight(50, 90.0);
+
+    RPS_Angle(180.0);
+
+    // Adjust x-location in reference to absolute coordinates
+    RPS_X_dec_abs(11.0);
+
+    Sleep(1000);
+
+    // Drop token
+    token_servo.SetDegree(167.0);
+    Sleep(1000);
+    token_servo.SetDegree(90.0);
+    Sleep(500);
+}
+
+void doFoosball() {
+
+    /*
+    // Go straight
+    move_forward(50, 2.8);
+    // Turn right
+    turnRight(40, 40.0);
+    // Adjust heading
+    RPS_Angle(3.0);
+    // Store current location
+    X_coord = RPS.X();
+    Y_coord = RPS.Y();
+    // Go straight
+    move_forward(50, 17.0);
+    // Adjust x-location
+    RPS_Xinc(X_coord, 16.0 + QR_OFFSET);
+    // Press RPS button
+    lever_servo.SetDegree(10.0);
+    Sleep(5000);
+    lever_servo.SetDegree(90.0);
+    // Move backward
+    move_backward(50, 1.0);
+    // Turn left
+    turnLeft(40, 20.0);
+    // Adjust heading
+    RPS_Angle(20.0);
+    // Store current location
+    X_coord = RPS.X();
+    Y_coord = RPS.Y();
+    // Go straight
+    move_forward(50, 1.0);
+    // Turn left
+    turnLeft(40, 65.0);
+    Sleep(100);
+    // Face towards acrylic ramp
+    RPS_Angle(88.0);
+    */
 
     // Store current location
     X_coord = RPS.X();
     Y_coord = RPS.Y();
 
     // Move forward to top of course
-    move_forward(80, 24.0);
+    move_forward(80, 23.0);
+    Sleep(300);
 
-    Sleep(500);
-
-    // Adjust heading on the ramp
+    // Adjust heading on top of the ramp
     RPS_Angle(89.0);
 
-    // Go straight
-    move_forward(50, 22.0);
+    // Go straight towards foosball
+    move_forward(50, 23.0);
 
     // Adjust y-location
     RPS_Yinc(Y_coord, 46.5 + QR_OFFSET);
 
     // Adjust heading
     RPS_Angle(90.0);
-
-    Sleep(250);
+//Sleep(250);
 
     // Turn right
-    turnRight(50, 30.0);
-
-    Sleep(250);
+    turnRight(50, 20.0);
+//Sleep(250);
 
     // Go straight
     move_backward(40, 2.5);
-
-    Sleep(250);
+//Sleep(250);
 
     // Turn right
-    turnRight(50, 35.0);
+    turnRight(50, 30.0);
 
     // Go straight
     move_forward(30, 1.5);
 
     // Turn right
-    turnRight(50, 30.0);
+    turnRight(50, 25.0);
 
     // Go straight
-    move_forward(50, 3.5);
+    move_forward(50, 1.5);
+
+    // Turn right
+    turnRight(50, 10.0);
+
+    // Go straight
+    move_forward(50, 2.0);
 
     Sleep(250);
 
     // Go straight
-    move_forward(60, 2.0);
+    move_forward(60, 1.0);
 
     Sleep(1000);
 
@@ -832,86 +906,72 @@ void doFoosball() {
     Y_coord = RPS.Y();
 
     // Go straight
-    move_backward(30, 5.0);
+    move_backward(30, 6.0);
 
     // Raise lever arm
     lever_servo.SetDegree(90.0);
 
     // Go straight
-    move_forward(50, 1.5);
+    move_forward(50, 2.5);
 
     // Grab foosball rings
     lever_servo.SetDegree(173.0);
 
     // Go straight
-    move_backward(30, 5.0);
+    move_backward(30, 6.0);
 
     // Raise lever arm
     lever_servo.SetDegree(90.0);
 
-    // Go straight
-    move_forward(50, 1.5);
-
-    // Grab foosball rings
-    lever_servo.SetDegree(173.0);
-
-    // Go straight
-    move_backward(50, 5.0);
-
-    // Raise lever arm
-    lever_servo.SetDegree(90.0);
-
+    /*
     // Turn right
     turnRight(40, 15.0);
-
     // Adjust angle
     RPS_Angle(345.0);
-
     // Go straight
-    move_forward(50, 6.0);
-
+    move_forward(50, 7.0);
     // Turn right
-    turnRight(40, 55.0);
-
-    // Go straight
-    move_forward(50, 1.5);
-
-    // Turn right
-    turnRight(40, 25.0);
-
+    turnRight(40, 45.0);
     // Adjust angle
     RPS_Angle(270.0);
-
     // Store current location
     X_coord = RPS.X();
     Y_coord = RPS.Y();
-
     // Move forward to bottom of course
     move_forward(80, 23.0);
-
     Sleep(500);
-
     // Adjust heading on the ramp
     RPS_Angle(270.0);
-
     // Go straight
-    move_forward(50, 18.0);
-
+    move_forward(50, 23.0);
     // Adjust y-location
-    RPS_Ydec(Y_coord, -41.0 - QR_OFFSET);
-
+    RPS_Ydec(Y_coord, 46.0 + QR_OFFSET);
     // Turn left
     turnRight(40, 80.0);
-
     // Adjust angle
-    RPS_Angle(200.0);
-
+    RPS_Angle(170.0);
     // Go straight
-    move_forward(50, 40.0);
+    move_forward(50, 24.0);
+    */
 }
 
 void finish() {
+    turnRight(40, 20.0);
 
+    move_forward(50, 6.0);
+
+    turnLeft(50, 110.0);
+
+    RPS_Angle(270.0);
+
+    //Clear bump
+    move_forward(40, 5.0);
+
+    //Hit final red button
+    bl_motor.SetPercent(90);
+    fr_motor.SetPercent(-90);
+    fl_motor.SetPercent(90);
+    br_motor.SetPercent(-90);
 }
 
 void initialize(){
@@ -935,17 +995,20 @@ void initialize(){
 
     lever_servo.SetDegree(90);
     token_servo.SetDegree(90);
-    Sleep(100);
+    Sleep(1000);
 
     LCD.Clear();
     LCD.WriteLine("Ready!!!");
 
-    Sleep(1000);
+    Sleep(3000);
 }
 
 int main() {
     initialize();   // Run through startup sequence
     waitForLight(); // Wait for start light
-    doFoosball();      // Execute the foosball task
+    doDDR();        // Execute DDR task
+    doFoosball();   // Execute foosball task
+    doLever();      // Execute lever task
+    doToken();
+    finish();
 }
-
