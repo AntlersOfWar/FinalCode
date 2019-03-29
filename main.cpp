@@ -61,10 +61,8 @@ int theoreticalDegree(float degrees) {
  */
 void move_forward(int percent, float inches) {
     //Reset all encoder counts
-    Sleep(100);
     fl_encoder.ResetCounts();
     br_encoder.ResetCounts();
-    Sleep(100);
 
     int counts = theoreticalCounts(inches);
 
@@ -94,7 +92,6 @@ void move_forward(int percent, float inches) {
     fr_motor.Stop();
     fl_motor.Stop();
     br_motor.Stop();
-    Sleep(100);
 }
 
 /*
@@ -103,10 +100,8 @@ void move_forward(int percent, float inches) {
  */
 void move_backward(int percent, float inches) {
     //Reset all encoder counts
-    Sleep(100);
     fl_encoder.ResetCounts();
     br_encoder.ResetCounts();
-    Sleep(100);
 
     int counts = theoreticalCounts(inches);
 
@@ -136,7 +131,6 @@ void move_backward(int percent, float inches) {
     fr_motor.Stop();
     fl_motor.Stop();
     br_motor.Stop();
-    Sleep(100);
 }
 
 /*
@@ -145,10 +139,8 @@ void move_backward(int percent, float inches) {
  */
 void turnLeft(int percent, float degrees) {
     //Reset all encoder counts
-    Sleep(100);
     fl_encoder.ResetCounts();
     br_encoder.ResetCounts();
-    Sleep(100);
 
     int counts = theoreticalDegree(degrees);
 
@@ -178,7 +170,6 @@ void turnLeft(int percent, float degrees) {
     fr_motor.Stop();
     fl_motor.Stop();
     br_motor.Stop();
-    Sleep(100);
 }
 
 /*
@@ -187,10 +178,8 @@ void turnLeft(int percent, float degrees) {
  */
 void turnRight(int percent, float degrees) {
     //Reset all encoder counts
-    Sleep(100);
     fl_encoder.ResetCounts();
     br_encoder.ResetCounts();
-    Sleep(100);
 
     int counts = theoreticalDegree(degrees);
 
@@ -220,7 +209,6 @@ void turnRight(int percent, float degrees) {
     fr_motor.Stop();
     fl_motor.Stop();
     br_motor.Stop();
-    Sleep(100);
 }
 
 /*
@@ -664,7 +652,10 @@ bool checkDDRLight(int percent) {
 
     bool lightFound = false;
     bool redLight;
-    while (!lightFound) {
+
+    int failsafe = 0;
+
+    while (!lightFound && failsafe < 10) {
         if (cds.Value() <= RED_THRESH) {
             bl_motor.Stop();
             fr_motor.Stop();
@@ -680,7 +671,14 @@ bool checkDDRLight(int percent) {
             lightFound = true;
             redLight = false;
         }
-    }
+        else{
+            failsafe++;
+        }
+   }
+   if(failsafe == 10){
+       redLight = false;
+   }
+
    return redLight;
 }
 
@@ -697,7 +695,7 @@ void doDDR() {
     RPS_Y_inc_abs(14.8);
 
     // Turn right
-    turnRight(40, 45.0);
+    turnRight(40, 40.0);
 
     // Adjust heading
     RPS_Angle(0.0);
@@ -706,16 +704,16 @@ void doDDR() {
     move_forward(70, 3);
 
     // Adjust heading
-    RPS_Angle(356.0);
+    RPS_Angle(355.0);
 
     // Go straight
     move_forward(70, 3);
 
     // Adjust heading
-    RPS_Angle(353.0);
+    RPS_Angle(349.0);
 
-    // Go straight
-    move_forward(70, 3.5);
+    // Go to specific x-location
+    RPS_X_inc_abs(23.5);
 
     // Go straight and check for DDR light color (new as of 3/26)
     bool redLight = checkDDRLight(20);
@@ -749,7 +747,7 @@ void doDDR() {
         bl_motor.Stop();
         fl_motor.Stop();
 
-        move_backward(70, 3.0);
+        move_backward(70, 2.5);
 
         turnLeft(40, 80.0);
 
@@ -771,7 +769,7 @@ void doDDR() {
 
         move_forward(70, 7.0);
 
-        turnRight(40, 90);
+        turnRight(40, 100);
 
         RPS_Angle(270.0);
 
@@ -787,7 +785,7 @@ void doDDR() {
         fl_motor.Stop();
         br_motor.Stop();
 
-        move_backward(70, 3.0);
+        move_backward(70, 2.5);
 
         turnLeft(40, 80.0);
 
@@ -818,7 +816,7 @@ void doDDR() {
     RPS_Angle(20.0);
 
     // Go straight
-    move_forward(50, 1.0);
+    move_forward(50, 1.5);
 
     // Turn left
     turnLeft(40, 65.0);
@@ -835,7 +833,6 @@ void doFoosball() {
 
     // Move forward to top of course
     move_forward(80, 25.0);
-    Sleep(300);
 
     // Adjust heading on top of the ramp
     RPS_Angle(90.0);
@@ -847,7 +844,7 @@ void doFoosball() {
     RPS_Angle(88.0);
 
     // Go straight towards foosball
-    move_forward(70, 13.0);
+    move_forward(70, 12.5);
 
     // Adjust y-location
     RPS_Y_inc_abs(66.0);
@@ -856,19 +853,19 @@ void doFoosball() {
     RPS_Angle(90.0);
 
     // Turn right
-    turnRight(50, 20.0);
+    turnRight(50, 40.0);
 
     // Go straight
     move_backward(40, 2.0);
 
     // Turn right
-    turnRight(50, 30.0);
+    turnRight(50, 20.0);
 
     // Go straight
     move_forward(30, 1.5);
 
     // Turn right
-    turnRight(50, 25.0);
+    turnRight(50, 15.0);
 
     // Go straight
     move_forward(50, 1.5);
@@ -876,15 +873,16 @@ void doFoosball() {
     // Turn right
     turnRight(50, 10.0);
 
-    // Go straight
-    move_forward(50, 2.0);
-
-    Sleep(250);
-
-    // Go straight
-    move_forward(60, 2.0);
-
-    Sleep(1000);
+    // Go straight 1500 ms
+    bl_motor.SetPercent(50);
+    fr_motor.SetPercent(-1 * 50);
+    fl_motor.SetPercent(50);
+    br_motor.SetPercent(-1 * 50);
+    Sleep(1500);
+    bl_motor.Stop();
+    fr_motor.Stop();
+    fl_motor.Stop();
+    br_motor.Stop();
 
     // Go straight
     move_backward(50, 0.5);
@@ -897,7 +895,7 @@ void doFoosball() {
     Y_coord = RPS.Y();
 
     // Go straight
-    move_backward(30, 5.0);
+    move_backward(30, 6.0);
 
     // Raise lever arm
     lever_servo.SetDegree(90.0);
@@ -912,29 +910,42 @@ void doFoosball() {
     lever_servo.SetDegree(168.0);
 
     // Go straight
-    move_backward(30, 5.5);
+    move_backward(40, 6.0);
+
+    // Raise lever arm a little
+    lever_servo.SetDegree(150.0);
+
+    Sleep(200);
+
+    // Go straight
+    move_forward(50, 1.0);
+
+    Sleep(200);
 
     // Raise lever arm
     lever_servo.SetDegree(90.0);
 
     // Adjust heading
     RPS_Angle(0.0);
+
+    // Go straight
+    move_backward(50, 1.0);
 }
 
 void doLever() {
     // Go straight
-    move_backward(50, 8.0);
+    move_backward(50, 6.8);
 
     // Turn right
-    turnRight(40, 60.0);
+    turnRight(40, 65.0);
 
     // Go straight
-    move_backward(50, 5.0);
+    move_backward(80, 5.5);
 
     // Push down lever
-    lever_servo.SetDegree(10.0);
+    lever_servo.SetDegree(5.0);
 
-    Sleep(2000);
+    Sleep(500);
 
     // Raise lever arm
     lever_servo.SetDegree(90.0);
@@ -942,35 +953,53 @@ void doLever() {
     Sleep(500);
 
     // Go straight
-    move_forward(50, 3.0);
+    move_forward(50, 3.7);
 
     // Turn right
-    turnRight(50, 130.0);
-
-    // Adjust heading
-    // RPS_Angle(220.0);
+    turnRight(50, 120.0);
 
     // Go straight
-    move_forward(70, 6.0);
+    move_forward(70, 17.0);
 
     // Turn right
-    turnLeft(40, 70.0);
-
-    // Adjust heading
-    // RPS_Angle(270.0);
+    turnLeft(40, 25.0);
 
     // Go straight
-    move_forward(70, 18.0);
+    move_forward(70, 10.0);
 }
 
 void doToken() {
+    // Go straight
+    move_backward(70, 2.0);
+
     // Turn right
-    turnRight(40, 90.0);
+    turnRight(40, 100.0);
+
+    // Go straight 3000 ms
+    bl_motor.SetPercent(50);
+    fr_motor.SetPercent(-1 * 50);
+    fl_motor.SetPercent(50);
+    br_motor.SetPercent(-1 * 50);
+    Sleep(3000);
+    bl_motor.Stop();
+    fr_motor.Stop();
+    fl_motor.Stop();
+    br_motor.Stop();
+
+    // Go to token slot
+    move_backward(50, 4.0);
+
+    // Turn right a little
+    turnRight(40, 10.0);
 
     // Go straight
-    move_backward(50, 10.0);
+    move_backward(40, 1.5);
 
-    Sleep(1000);
+    // Turn left a little
+    turnLeft(40, 10.0);
+
+    // Go straight
+    move_backward(50, 2.5);
 
     // Drop token
     token_servo.SetDegree(167.0);
@@ -985,7 +1014,7 @@ void finish() {
 
     turnLeft(40, 90.0);
 
-    move_forward(50, 10.0);
+    move_forward(80, 20.0);
 
     RPS_Angle(270.0);
 
