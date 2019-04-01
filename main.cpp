@@ -35,6 +35,11 @@ FEHMotor br_motor(FEHMotor::Motor2, 5.0);
 //Declare CdS cell
 AnalogInputPin cds(FEHIO::P0_4);
 
+// Declare global positioning variables
+float startingPointY;
+float ddrLightX;
+float foosballDistY;
+
 /*
  * Given a distance in inches, returns the theoretical counts.
  */
@@ -254,6 +259,44 @@ void RPS_Xinc(float startX, float inches) {
     Sleep(100);
 }
 
+void RPS_Xinc_rev(float startX, float inches) {
+    Sleep(100);
+    if (RPS.X() < startX + (inches - 0.2)) {
+        LCD.Clear();
+        LCD.WriteLine("Too short!");
+        bl_motor.SetPercent(-30);
+        fr_motor.SetPercent(30);
+        fl_motor.SetPercent(-30);
+        br_motor.SetPercent(30);
+        while (RPS.X() < startX + inches) {
+            LCD.WriteRC(RPS.X(),2,12);
+            LCD.WriteRC(RPS.Y(),3,12);
+            LCD.WriteRC(RPS.Heading(),4,12);
+        }
+        bl_motor.Stop();
+        fr_motor.Stop();
+        fl_motor.Stop();
+        br_motor.Stop();
+    } else if (RPS.X() > startX + (inches + 0.2)) {
+        LCD.Clear();
+        LCD.WriteLine("Too far!");
+        bl_motor.SetPercent(30);
+        fr_motor.SetPercent(-30);
+        fl_motor.SetPercent(30);
+        br_motor.SetPercent(-30);
+        while (RPS.X() > startX + inches) {
+            LCD.WriteRC(RPS.X(),2,12);
+            LCD.WriteRC(RPS.Y(),3,12);
+            LCD.WriteRC(RPS.Heading(),4,12);
+        }
+        bl_motor.Stop();
+        fr_motor.Stop();
+        fl_motor.Stop();
+        br_motor.Stop();
+    }
+    Sleep(100);
+}
+
 /*
  * Given a reference point (@param startX) and the desired displacement (@param inches),
  * moves robot in X direction to the location relative to the starting point.
@@ -403,7 +446,7 @@ void RPS_Angle(float desiredDeg){
             fl_motor.SetPercent(30);
             br_motor.SetPercent(30);
 
-            Sleep(100);
+            Sleep(75);
 
             // Stop motors
             bl_motor.Stop();
@@ -423,7 +466,7 @@ void RPS_Angle(float desiredDeg){
             fl_motor.SetPercent(-30);
             br_motor.SetPercent(-30);
 
-            Sleep(100);
+            Sleep(75);
 
             // Stop motors
             bl_motor.Stop();
@@ -443,7 +486,7 @@ void RPS_Angle(float desiredDeg){
             fl_motor.SetPercent(30);
             br_motor.SetPercent(30);
 
-            Sleep(100);
+            Sleep(75);
 
             // Stop motors
             bl_motor.Stop();
@@ -463,7 +506,7 @@ void RPS_Angle(float desiredDeg){
             fl_motor.SetPercent(-30);
             br_motor.SetPercent(-30);
 
-            Sleep(100);
+            Sleep(75);
 
             // Stop motors
             bl_motor.Stop();
@@ -478,7 +521,7 @@ void RPS_Angle(float desiredDeg){
             fl_motor.SetPercent(-30);
             br_motor.SetPercent(-30);
 
-            Sleep(100);
+            Sleep(75);
 
             // Stop motors
             bl_motor.Stop();
@@ -692,7 +735,7 @@ void doDDR() {
     RPS_Angle(45.0);
 
     // Adjust y-position
-    RPS_Y_inc_abs(14.8);
+    RPS_Y_inc_abs(startingPointY);
 
     // Turn right
     turnRight(40, 40.0);
@@ -704,16 +747,16 @@ void doDDR() {
     move_forward(70, 3);
 
     // Adjust heading
-    RPS_Angle(355.0);
+    RPS_Angle(356.0);
 
     // Go straight
-    move_forward(70, 3);
+    move_forward(70, 3.5);
 
     // Adjust heading
-    RPS_Angle(349.0);
+    RPS_Angle(351.0);
 
     // Go to specific x-location
-    RPS_X_inc_abs(23.5);
+    RPS_X_inc_abs(ddrLightX);
 
     // Go straight and check for DDR light color (new as of 3/26)
     bool redLight = checkDDRLight(20);
@@ -847,7 +890,7 @@ void doFoosball() {
     move_forward(70, 12.5);
 
     // Adjust y-location
-    RPS_Y_inc_abs(66.0);
+    RPS_Y_inc_abs(foosballDistY);
 
     // Adjust heading
     RPS_Angle(90.0);
@@ -939,6 +982,9 @@ void doLever() {
     // Turn right
     turnRight(40, 65.0);
 
+    // Adjust heading
+    RPS_Angle(315.0);
+
     // Go straight
     move_backward(80, 5.5);
 
@@ -959,13 +1005,16 @@ void doLever() {
     turnRight(50, 120.0);
 
     // Go straight
-    move_forward(70, 17.0);
+    move_forward(70, 15.0);
 
     // Turn right
     turnLeft(40, 25.0);
 
+    // Adjust heading
+    RPS_Angle(270.0);
+
     // Go straight
-    move_forward(70, 10.0);
+    move_forward(70, 9.0);
 }
 
 void doToken() {
@@ -974,6 +1023,9 @@ void doToken() {
 
     // Turn right
     turnRight(40, 100.0);
+
+    // Adjust heading
+    RPS_Angle(180.0);
 
     // Go straight 3000 ms
     bl_motor.SetPercent(50);
@@ -986,20 +1038,27 @@ void doToken() {
     fl_motor.Stop();
     br_motor.Stop();
 
+    // Store current position
+    X_coord = RPS.X();
+    Y_coord = RPS.Y();
+
     // Go to token slot
     move_backward(50, 4.0);
 
     // Turn right a little
-    turnRight(40, 10.0);
+    turnRight(40, 15.0);
 
     // Go straight
     move_backward(40, 1.5);
 
     // Turn left a little
-    turnLeft(40, 10.0);
+    turnLeft(40, 15.0);
 
     // Go straight
     move_backward(50, 2.5);
+
+    // Adjust x position
+    RPS_Xinc_rev(X_coord, 9.5);
 
     // Drop token
     token_servo.SetDegree(167.0);
@@ -1025,11 +1084,85 @@ void finish() {
     br_motor.SetPercent(-90);
 }
 
+// This function stores three locations on the course for robot navigation
+void calibrate(){
+    int i = 1;
+    float x_position, y_position;
+
+    // Store location of desired distance from start
+    while(i == 1){
+        // Print menu
+        LCD.DrawRectangle(55, 45, 200, 150);
+        LCD.WriteAt("Store POS1", 100, 126);
+
+        LCD.Touch(&x_position, &y_position);
+
+        while(!LCD.Touch(&x_position, &y_position)){
+            // Print RPS values
+            LCD.WriteAt("RPS X: ", 10, 210);
+            LCD.WriteAt(RPS.X(), 70, 210);
+            LCD.WriteAt("RPS Y: ", 130, 210);
+            LCD.WriteAt(RPS.Y(), 190, 210);
+        }
+        Sleep(500);
+        if(y_position > 45 && y_position < 195 && x_position > 55 && x_position < 255){
+            startingPointY = RPS.Y();
+            i++;
+        }
+    }
+
+    // Store location of DDR light
+    while(i == 2){
+        // Print menu
+        LCD.DrawRectangle(55, 45, 200, 150);
+        LCD.WriteAt("Store POS2", 100, 126);
+
+        LCD.Touch(&x_position, &y_position);
+
+        while(!LCD.Touch(&x_position, &y_position)){
+            // Print RPS values
+            LCD.WriteAt("RPS X: ", 10, 210);
+            LCD.WriteAt(RPS.X(), 70, 210);
+            LCD.WriteAt("RPS Y: ", 130, 210);
+            LCD.WriteAt(RPS.Y(), 190, 210);
+        }
+        Sleep(500);
+        if(y_position > 45 && y_position < 195 && x_position > 55 && x_position < 255){
+            ddrLightX = RPS.X();
+            i++;
+        }
+    }
+
+    // Store location of distance from foosball structure
+    while(i == 3){
+        // Print menu
+        LCD.DrawRectangle(55, 45, 200, 150);
+        LCD.WriteAt("Store POS3", 100, 126);
+
+        LCD.Touch(&x_position, &y_position);
+
+        while(!LCD.Touch(&x_position, &y_position)){
+            // Print RPS values
+            LCD.WriteAt("RPS X: ", 10, 210);
+            LCD.WriteAt(RPS.X(), 70, 210);
+            LCD.WriteAt("RPS Y: ", 130, 210);
+            LCD.WriteAt(RPS.Y(), 190, 210);
+        }
+        Sleep(500);
+        if(y_position > 45 && y_position < 195 && x_position > 55 && x_position < 255){
+            foosballDistY = RPS.Y();
+            i++;
+        }
+    }
+}
+
 void initialize(){
     // min for lever servo: 725
     // max for lever servo: 2468
     // min for token servo: 514
     // max for token servo: 2430
+
+    float x_position, y_position;
 
     RPS.InitializeTouchMenu();
 
@@ -1049,9 +1182,15 @@ void initialize(){
     Sleep(1000);
 
     LCD.Clear();
-    LCD.WriteLine("Ready!!!");
+    LCD.WriteLine("Begin Calibration");
+
+    calibrate();
 
     Sleep(500);
+    // Wait for final action
+    LCD.Clear();
+    LCD.Write("Touch anywhere to begin");
+    while(!LCD.Touch(&x_position, &y_position));
 }
 
 int main() {

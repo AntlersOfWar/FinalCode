@@ -1,2 +1,2 @@
    text	   data	    bss	    dec	    hex	filename
-  54080	   3424	   5628	  63132	   f69c	../FinalCode.elf
+  56620	   3424	   5640	  65684	  10094	../FinalCode.elf
