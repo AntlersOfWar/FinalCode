@@ -841,7 +841,7 @@ void doDDR() {
 
         Sleep(100);
 
-        RPS_Angle(2.0);
+        RPS_Angle(358.0);
 
         RPS_X_inc_abs(30.5);
 
@@ -879,7 +879,7 @@ void doDDR() {
 
         Sleep(100);
 
-        RPS_Angle(2.0);
+        RPS_Angle(358.0);
 
         move_backward(70, 4.0);
 
