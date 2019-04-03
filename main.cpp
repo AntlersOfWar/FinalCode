@@ -7,30 +7,34 @@
 #include <FEHSD.h>
 #include <math.h>
 
+
+// QR_OFFSET used because QR code is not centered on robot.
 #define WHEEL_RADIUS 1.375
 #define COUNTS_PER_REV 48
 #define PI 3.1415926535
 #define ROBOT_RADIUS 4.7
 #define QR_OFFSET 2.0
+
+// X_coord and Y_coord used to store previous location when using relative RPS X and Y checks.
 float X_coord;
 float Y_coord;
 
-/* TODO: Make sure you have the right number of motors/encoders declared. */
 FEHServo lever_servo(FEHServo::Servo6);
 FEHServo token_servo(FEHServo::Servo0);
 
+// Declare encoders
 /* NOTE: P3_6 and P3_7 cannot be used for digital encoders. Also, "fr" means front-right. "bl" means back-left. */
 DigitalEncoder fl_encoder(FEHIO::P1_1);
 DigitalEncoder br_encoder(FEHIO::P2_0);
 
-//Declare motors
+// Declare motors
 FEHMotor bl_motor(FEHMotor::Motor0, 5.0);
 FEHMotor fr_motor(FEHMotor::Motor3, 5.0);
 FEHMotor fl_motor(FEHMotor::Motor1, 5.0);
 FEHMotor br_motor(FEHMotor::Motor2, 5.0);
 
 
-//Declare CdS cell
+// Declare CdS cell
 AnalogInputPin cds(FEHIO::P0_4);
 
 // Declare global positioning variables
@@ -39,12 +43,13 @@ float ddrLightX;
 float foosballDistY;
 float bumpY;
 
-// Declare global light variable
+// Declare global light variable and general difference between ambient light and red light
 float ambient;
 float redDiff;
 
 /*
- * Given a distance in inches, returns the theoretical counts.
+ * Given a distance in inches (@param inches), returns the theoretical counts.
+ * @Returns [theoretical counts for a desired distance]
  */
 int theoreticalCounts(float inches) {
     int counts = (inches * COUNTS_PER_REV) / (2 * PI * WHEEL_RADIUS);
@@ -52,7 +57,8 @@ int theoreticalCounts(float inches) {
 }
 
 /*
- * Given a degree, returns the theoretical counts (if the robot were to turn about the center).
+ * Given a degree (@param degrees), returns the theoretical counts (if the robot were to turn about the center).
+ * @Returns [theoretical counts for a desired angle]
  */
 int theoreticalDegree(float degrees) {
     float radians = degrees * PI / 180;
@@ -220,9 +226,9 @@ void turnRight(int percent, float degrees) {
 }
 
 /*
+ * If robot move_forward direction faces positive X:
  * Given a reference point (@param startX) and the desired displacement (@param inches),
- * moves robot in X direction to the location relative to the starting point.
- * (if robot move_forward direction faces positive X)
+ * moves robot in positive X direction to the location relative to the starting point.
  */
 void RPS_Xinc(float startX, float inches) {
     Sleep(100);
@@ -262,6 +268,11 @@ void RPS_Xinc(float startX, float inches) {
     Sleep(100);
 }
 
+/*
+ * If robot move_forward direction faces negative X:
+ * Given a reference point (@param startX) and the desired displacement (@param inches),
+ * moves robot in positive X direction to the location relative to the starting point.
+ */
 void RPS_Xinc_rev(float startX, float inches) {
     Sleep(100);
     if (RPS.X() < startX + (inches - 0.2)) {
@@ -302,10 +313,10 @@ void RPS_Xinc_rev(float startX, float inches) {
 
 /*
  * Given a reference point (@param startX) and the desired displacement (@param inches),
- * moves robot in X direction to the location relative to the starting point.
+ * moves robot in negative X direction to the location relative to the starting point.
  * (if robot move_forward direction faces negative X)
  */
-void RPS_Xdec(float startX, float inches) {
+void RPS_Xdec(float startX, float inches) { /* NOTE: UNUSED FUNCTION */
     Sleep(100);
     if (RPS.X() > startX + (inches - 0.2)) {
         LCD.Clear();
@@ -344,9 +355,9 @@ void RPS_Xdec(float startX, float inches) {
 }
 
 /*
+ * If robot move_forward direction faces positive Y:
  * Given a reference point (@param startY) and the desired displacement (@param inches),
- * moves robot in Y direction to the location relative to the starting point.
- * (if robot move_forward direction faces positive Y)
+ * moves robot in positive Y direction to the location relative to the starting point.
  */
 void RPS_Yinc(float startY, float inches) {
     Sleep(100);
@@ -387,9 +398,9 @@ void RPS_Yinc(float startY, float inches) {
 }
 
 /*
+ * If robot move_forward direction faces negative Y:
  * Given a reference point (@param startY) and the desired displacement (@param inches),
- * moves robot in Y direction to the location relative to the starting point.
- * (if robot move_forward direction faces negative Y)
+ * moves robot in negative Y direction to the location relative to the starting point.
  */
 void RPS_Ydec(float startY, float inches) {
     Sleep(100);
@@ -433,7 +444,6 @@ void RPS_Ydec(float startY, float inches) {
  * Given a desired angle (@param desiredDeg), rotates the robot until desired angle is achieved.
  * This program aims to ensure the robot will always take the shortest path to the desired heading
  */
-
 void RPS_Angle(float desiredDeg){
     Sleep(200);
     while(abs(desiredDeg - RPS.Heading()) > 1.0){
@@ -543,11 +553,11 @@ void RPS_Angle(float desiredDeg){
 }
 
 /*
+ * If robot move_forward direction faces negative X:
  * Given an absolute desired X position (@param inches),
  * moves robot in X direction to that X position.
- * (if robot move_forward direction faces negative X)
  */
-void RPS_X_dec_abs(float inches) {
+void RPS_X_dec_abs(float inches) { /* NOTE: UNUSED FUNCTION */
     Sleep(100);
     if (RPS.X() > (inches - 0.2)) {
         LCD.Clear();
@@ -586,9 +596,9 @@ void RPS_X_dec_abs(float inches) {
 }
 
 /*
+ * If robot move_forward direction faces positive X:
  * Given an absolute desired X position (@param inches),
  * moves robot in X direction to that X position.
- * (if robot move_forward direction faces positive X)
  */
 void RPS_X_inc_abs(float inches) {
     Sleep(100);
@@ -628,6 +638,11 @@ void RPS_X_inc_abs(float inches) {
     Sleep(100);
 }
 
+/*
+ * If robot move_forward direction faces positive Y:
+ * Given an absolute desired Y position (@param inches),
+ * moves robot in Y direction to that Y position.
+ */
 void RPS_Y_inc_abs(float inches) {
     Sleep(100);
     if (RPS.Y() < (inches - 0.2)) {
@@ -666,6 +681,11 @@ void RPS_Y_inc_abs(float inches) {
     Sleep(100);
 }
 
+/*
+ * If robot move_forward direction faces negative Y:
+ * Given an absolute desired Y position (@param inches),
+ * moves robot in Y direction to that Y position.
+ */
 void RPS_Y_dec_abs(float inches) {
     Sleep(100);
     if (RPS.Y() > (inches - 0.2)) {
@@ -705,8 +725,8 @@ void RPS_Y_dec_abs(float inches) {
 }
 
 /*
- * Function called at the beginning to start off based off the red start light,
- * or if 30 seconds has passed.
+ * Function called at the beginning to start off based on a light difference,
+ * or if 30 seconds has passed. Also stores the general difference between ambient and red light.
  */
 void waitForLight() {
 
@@ -726,8 +746,8 @@ void waitForLight() {
 
 /*
  * Given a desired motor speed (@param percent), moves robot forward at that speed,
- * toward the DDR floor lights. The CdS cell should go over these lights.
- * Returns [red light was detected]
+ * toward the closest DDR light. The CdS cell should go over this light.
+ * @Returns [red light was detected]
  */
 bool checkDDRLight(int percent) {
     Sleep(100);
@@ -775,6 +795,9 @@ bool checkDDRLight(int percent) {
  * Later on, only one of the functions (doDDR()) will have the waitForLight() function. The others will have to go off the previous task function called.
  */
 
+/*
+ * Does everything from starting off to the end of DDR, facing towards the ramp.
+ */
 void doDDR() {
     // Adjust heading
     RPS_Angle(45.0);
@@ -913,6 +936,9 @@ void doDDR() {
     RPS_Angle(88.0);
 }
 
+/*
+ * Does everything from going up the ramp to immediately before turning to face towards the lever.
+ */
 void doFoosball() {
 
     // Store current location
@@ -1020,6 +1046,9 @@ void doFoosball() {
     move_backward(50, 1.0);
 }
 
+/*
+ * Does everything from end of foosball task to immediately before turning to square-up against the left wall.
+ */
 void doLever() {
     // Go straight
     move_backward(50, 6.8);
@@ -1065,6 +1094,9 @@ void doLever() {
     RPS_Y_dec_abs(bumpY);
 }
 
+/*
+ * Does the squaring up, leading to the token task.
+ */
 void doToken() {
     // Go straight
     move_backward(70, 1.0);
@@ -1118,6 +1150,9 @@ void doToken() {
     Sleep(500);
 }
 
+/*
+ * Final function. From after completing the token task to pressing the final button.
+ */
 void finish() {
 
     move_forward(70, 10.0);
@@ -1135,7 +1170,10 @@ void finish() {
     br_motor.SetPercent(-90);
 }
 
-// This function stores three locations on the course for robot navigation
+/*
+ * This function is used to store 4 essential locations to execute a perfect run.
+ * Utilizes manual placement of robot and touch screen to store current robot cordinates.
+ */
 void calibrate(){
     int i = 1;
     float x_position, y_position;
@@ -1229,6 +1267,10 @@ void calibrate(){
     }
 }
 
+/*
+ * Critical function in that it sets up everything beforehand:
+ * the servo initializations and their initial positions and calibration.
+ */
 void initialize(){
     // min for lever servo: 725
     // max for lever servo: 2468
@@ -1269,12 +1311,15 @@ void initialize(){
     ambient = cds.Value();
 }
 
+/*
+ * Main function.
+ */
 int main() {
-    initialize();   // Run through startup sequence
-    waitForLight(); // Wait for start light
-    doDDR();        // Execute DDR task
-    doFoosball();   // Execute foosball task
-    doLever();      // Execute lever task
+    initialize();
+    waitForLight();
+    doDDR();
+    doFoosball();
+    doLever();
     doToken();
     finish();
 }
