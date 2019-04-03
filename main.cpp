@@ -12,8 +12,6 @@
 #define PI 3.1415926535
 #define ROBOT_RADIUS 4.7
 #define QR_OFFSET 2.0
-#define RED_THRESH 0.7
-#define BLUE_THRESH 1.2
 float X_coord;
 float Y_coord;
 
@@ -39,6 +37,11 @@ AnalogInputPin cds(FEHIO::P0_4);
 float startingPointY;
 float ddrLightX;
 float foosballDistY;
+float bumpY;
+
+// Declare global light variable
+float ambient;
+float redDiff;
 
 /*
  * Given a distance in inches, returns the theoretical counts.
@@ -663,6 +666,44 @@ void RPS_Y_inc_abs(float inches) {
     Sleep(100);
 }
 
+void RPS_Y_dec_abs(float inches) {
+    Sleep(100);
+    if (RPS.Y() > (inches - 0.2)) {
+        LCD.Clear();
+        LCD.WriteLine("Too short!");
+        bl_motor.SetPercent(30);
+        fr_motor.SetPercent(-30);
+        fl_motor.SetPercent(30);
+        br_motor.SetPercent(-30);
+        while (RPS.Y() > inches) {
+            LCD.WriteRC(RPS.X(),2,12);
+            LCD.WriteRC(RPS.Y(),3,12);
+            LCD.WriteRC(RPS.Heading(),4,12);
+        }
+        bl_motor.Stop();
+        fr_motor.Stop();
+        fl_motor.Stop();
+        br_motor.Stop();
+    } else if (RPS.Y() < (inches + 0.2)) {
+        LCD.Clear();
+        LCD.WriteLine("Too far!");
+        bl_motor.SetPercent(-30);
+        fr_motor.SetPercent(30);
+        fl_motor.SetPercent(-30);
+        br_motor.SetPercent(30);
+        while (RPS.Y() < inches) {
+            LCD.WriteRC(RPS.X(),2,12);
+            LCD.WriteRC(RPS.Y(),3,12);
+            LCD.WriteRC(RPS.Heading(),4,12);
+        }
+        bl_motor.Stop();
+        fr_motor.Stop();
+        fl_motor.Stop();
+        br_motor.Stop();
+    }
+    Sleep(100);
+}
+
 /*
  * Function called at the beginning to start off based off the red start light,
  * or if 30 seconds has passed.
@@ -672,11 +713,15 @@ void waitForLight() {
     float time = TimeNow();
 
     // If 30 seconds pass and no light is read, just start
-    while(cds.Value() > RED_THRESH && TimeNow() - time < 30) {
+    while(cds.Value() > ambient - 0.5 && TimeNow() - time < 30) {
         LCD.Clear();
         LCD.WriteLine("Looking for Red Light...");
         LCD.WriteLine(cds.Value());
     }
+
+    Sleep(50);
+
+    redDiff = ambient - cds.Value();
 }
 
 /*
@@ -699,14 +744,14 @@ bool checkDDRLight(int percent) {
     int failsafe = 0;
 
     while (!lightFound && failsafe < 10) {
-        if (cds.Value() <= RED_THRESH) {
+        if (ambient - cds.Value() >= redDiff - 0.2) {
             bl_motor.Stop();
             fr_motor.Stop();
             fl_motor.Stop();
             br_motor.Stop();
             lightFound = true;
             redLight = true;
-        } else if (cds.Value() > RED_THRESH && cds.Value() <= BLUE_THRESH) {
+        } else if (ambient - cds.Value() <= redDiff - 0.205) {
             bl_motor.Stop();
             fr_motor.Stop();
             fl_motor.Stop();
@@ -796,7 +841,7 @@ void doDDR() {
 
         Sleep(100);
 
-        RPS_Angle(0.0);
+        RPS_Angle(2.0);
 
         RPS_X_inc_abs(30.5);
 
@@ -834,7 +879,7 @@ void doDDR() {
 
         Sleep(100);
 
-        RPS_Angle(0.0);
+        RPS_Angle(2.0);
 
         move_backward(70, 4.0);
 
@@ -899,10 +944,10 @@ void doFoosball() {
     turnRight(50, 40.0);
 
     // Go straight
-    move_backward(40, 2.0);
+    move_backward(40, 2.5);
 
     // Turn right
-    turnRight(50, 20.0);
+    turnRight(50, 25.0);
 
     // Go straight
     move_forward(30, 1.5);
@@ -1015,11 +1060,14 @@ void doLever() {
 
     // Go straight
     move_forward(70, 9.0);
+
+    // Adjust y position
+    RPS_Y_dec_abs(bumpY);
 }
 
 void doToken() {
     // Go straight
-    move_backward(70, 2.0);
+    move_backward(70, 1.0);
 
     // Turn right
     turnRight(40, 100.0);
@@ -1027,12 +1075,12 @@ void doToken() {
     // Adjust heading
     RPS_Angle(180.0);
 
-    // Go straight 3000 ms
+    // Go straight 2000 ms
     bl_motor.SetPercent(50);
     fr_motor.SetPercent(-1 * 50);
     fl_motor.SetPercent(50);
     br_motor.SetPercent(-1 * 50);
-    Sleep(3000);
+    Sleep(2000);
     bl_motor.Stop();
     fr_motor.Stop();
     fl_motor.Stop();
@@ -1043,26 +1091,29 @@ void doToken() {
     Y_coord = RPS.Y();
 
     // Go to token slot
-    move_backward(50, 4.0);
+    move_backward(50, 2.0);
 
     // Turn right a little
-    turnRight(40, 15.0);
+    turnRight(40, 25.0);
 
     // Go straight
-    move_backward(40, 1.5);
+    move_backward(40, 2.5);
 
     // Turn left a little
-    turnLeft(40, 15.0);
+    turnLeft(40, 25.0);
+
+    // Adjust heading
+    RPS_Angle(180.0);
 
     // Go straight
     move_backward(50, 2.5);
 
     // Adjust x position
-    RPS_Xinc_rev(X_coord, 9.5);
+    RPS_Xinc_rev(X_coord, 9.0);
 
     // Drop token
-    token_servo.SetDegree(167.0);
-    Sleep(1000);
+    token_servo.SetDegree(170.0);
+    Sleep(2000);
     token_servo.SetDegree(90.0);
     Sleep(500);
 }
@@ -1154,6 +1205,28 @@ void calibrate(){
             i++;
         }
     }
+
+    // Store location of bump
+    while(i == 4){
+        // Print menu
+        LCD.DrawRectangle(55, 45, 200, 150);
+        LCD.WriteAt("Store POS4", 100, 126);
+
+        LCD.Touch(&x_position, &y_position);
+
+        while(!LCD.Touch(&x_position, &y_position)){
+            // Print RPS values
+            LCD.WriteAt("RPS X: ", 10, 210);
+            LCD.WriteAt(RPS.X(), 70, 210);
+            LCD.WriteAt("RPS Y: ", 130, 210);
+            LCD.WriteAt(RPS.Y(), 190, 210);
+        }
+        Sleep(500);
+        if(y_position > 45 && y_position < 195 && x_position > 55 && x_position < 255){
+            bumpY = RPS.Y();
+            i++;
+        }
+    }
 }
 
 void initialize(){
@@ -1178,7 +1251,7 @@ void initialize(){
     Sleep(500);
 
     lever_servo.SetDegree(90);
-    token_servo.SetDegree(90);
+    token_servo.SetDegree(85);
     Sleep(1000);
 
     LCD.Clear();
@@ -1191,6 +1264,9 @@ void initialize(){
     LCD.Clear();
     LCD.Write("Touch anywhere to begin");
     while(!LCD.Touch(&x_position, &y_position));
+
+    // Store ambient light condition
+    ambient = cds.Value();
 }
 
 int main() {
