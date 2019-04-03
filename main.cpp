@@ -857,7 +857,7 @@ void doDDR() {
 
         move_forward(70, 7.0);
 
-        turnRight(40, 100);
+        turnRight(50, 103.0);
 
         RPS_Angle(270.0);
 
@@ -992,13 +992,13 @@ void doFoosball() {
     RPS_Angle(358.0);
 
     // Go straight
-    move_forward(50, 2.5);
+    move_forward(50, 3.0);
 
     // Grab foosball rings
     lever_servo.SetDegree(168.0);
 
     // Go straight
-    move_backward(40, 6.0);
+    move_backward(40, 6.5);
 
     // Raise lever arm a little
     lever_servo.SetDegree(150.0);
