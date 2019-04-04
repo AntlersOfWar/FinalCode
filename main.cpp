@@ -645,7 +645,7 @@ void RPS_X_inc_abs(float inches) {
  */
 void RPS_Y_inc_abs(float inches) {
     Sleep(100);
-    if (RPS.Y() < (inches - 0.2)) {
+    if (RPS.Y() < (inches - 0.1)) { //Was 0.2 tolerance before 4/3
         LCD.Clear();
         LCD.WriteLine("Too short!");
         bl_motor.SetPercent(30);
@@ -661,7 +661,7 @@ void RPS_Y_inc_abs(float inches) {
         fr_motor.Stop();
         fl_motor.Stop();
         br_motor.Stop();
-    } else if (RPS.Y() > (inches + 0.2)) {
+    } else if (RPS.Y() > (inches + 0.1)) {
         LCD.Clear();
         LCD.WriteLine("Too far!");
         bl_motor.SetPercent(-30);
@@ -733,7 +733,7 @@ void waitForLight() {
     float time = TimeNow();
 
     // If 30 seconds pass and no light is read, just start
-    while(cds.Value() > ambient - 0.5 && TimeNow() - time < 30) {
+    while(cds.Value() > ambient - 0.4 && TimeNow() - time < 30) {
         LCD.Clear();
         LCD.WriteLine("Looking for Red Light...");
         LCD.WriteLine(cds.Value());
@@ -764,14 +764,14 @@ bool checkDDRLight(int percent) {
     int failsafe = 0;
 
     while (!lightFound && failsafe < 10) {
-        if (ambient - cds.Value() >= redDiff - 0.2) {
+        if (ambient - cds.Value() >= redDiff - 0.25) { //Was 0.2 before, made more generous
             bl_motor.Stop();
             fr_motor.Stop();
             fl_motor.Stop();
             br_motor.Stop();
             lightFound = true;
             redLight = true;
-        } else if (ambient - cds.Value() <= redDiff - 0.205) {
+        } else if (ambient - cds.Value() <= redDiff - 0.255) {
             bl_motor.Stop();
             fr_motor.Stop();
             fl_motor.Stop();
@@ -853,12 +853,12 @@ void doDDR() {
         bl_motor.SetPercent(50);
         fl_motor.SetPercent(50);
 
-        Sleep(6500);
+        Sleep(5500);
 
         bl_motor.Stop();
         fl_motor.Stop();
 
-        move_backward(70, 2.5);
+        move_backward(70, 2.1);
 
         turnLeft(40, 80.0);
 
@@ -889,14 +889,14 @@ void doDDR() {
         fl_motor.SetPercent(50);
         br_motor.SetPercent(-1 * 50);
 
-        Sleep(6500);
+        Sleep(5700);
 
         bl_motor.Stop();
         fr_motor.Stop();
         fl_motor.Stop();
         br_motor.Stop();
 
-        move_backward(70, 2.5);
+        move_backward(70, 2.3); // 4/3
 
         turnLeft(40, 80.0);
 
@@ -904,7 +904,7 @@ void doDDR() {
 
         RPS_Angle(358.0);
 
-        move_backward(70, 4.0);
+        move_backward(70, 3.5); // 4/3
 
         RPS_X_inc_abs(30.5);
     }
@@ -953,15 +953,29 @@ void doFoosball() {
 
     // Go straight off ramp
     move_forward(70, 12.0);
+    Sleep(100);
 
-    // Adjust heading
-    RPS_Angle(88.0);
+    if (RPS.X() < 30.2) {
+        RPS_Angle(89.0);
+    } else if (RPS.X() > 30.7) {
+        RPS_Angle(93.0);
+    } else {
+        RPS_Angle(90.0);
+    }
+    /* Adjust heading
+    RPS_Angle(90.0); //Was 88.0 before 4/3 */
 
     // Go straight towards foosball
     move_forward(70, 12.5);
 
+    RPS_Angle(90.0);
+
+    Sleep(250); //Sleep functions added as of 4/3
+
     // Adjust y-location
     RPS_Y_inc_abs(foosballDistY);
+
+    Sleep(100);
 
     // Adjust heading
     RPS_Angle(90.0);
@@ -1040,7 +1054,7 @@ void doFoosball() {
     lever_servo.SetDegree(90.0);
 
     // Adjust heading
-    RPS_Angle(0.0);
+    RPS_Angle(357.0); //Used to be 0.0
 
     // Go straight
     move_backward(50, 1.0);
@@ -1054,10 +1068,17 @@ void doLever() {
     move_backward(50, 6.8);
 
     // Turn right
-    turnRight(40, 65.0);
+    turnRight(40, 20.0);
+    Sleep(100); //Break into two turns as of 4/3
+
+    move_backward(40, 1.2);
+    Sleep(100);
+
+    // Turn right
+    turnRight(40, 45.0);
 
     // Adjust heading
-    RPS_Angle(315.0);
+    RPS_Angle(308.0); //Originally 315.0
 
     // Go straight
     move_backward(80, 5.5);
