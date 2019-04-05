@@ -6,6 +6,7 @@
 #include <FEHServo.h>
 #include <FEHSD.h>
 #include <math.h>
+#include <FEHBattery.h>
 
 
 // QR_OFFSET used because QR code is not centered on robot.
@@ -806,7 +807,7 @@ void doDDR() {
     RPS_Y_inc_abs(startingPointY);
 
     // Turn right
-    turnRight(40, 40.0);
+    turnRight(60, 40.0);
 
     // Adjust heading
     RPS_Angle(0.0);
@@ -878,7 +879,7 @@ void doDDR() {
 
         RPS_Angle(0.0);
 
-        move_forward(70, 7.0);
+        move_forward(90, 6.5);
 
         turnRight(70, 106.0);
 
@@ -922,7 +923,7 @@ void doDDR() {
     move_backward(50, 1.0);
 
     // Turn left
-    turnLeft(40, 20.0);
+    turnLeft(60, 20.0);
 
     // Adjust heading
     RPS_Angle(20.0);
@@ -931,7 +932,7 @@ void doDDR() {
     move_forward(50, 1.5);
 
     // Turn left
-    turnLeft(40, 65.0);
+    turnLeft(60, 65.0);
 
     // Face towards acrylic ramp
     RPS_Angle(88.0);
@@ -956,15 +957,16 @@ void doFoosball() {
     move_forward(70, 12.0);
     Sleep(100);
 
+    // Adjust if robot is too close or far to wall
     if (RPS.X() < 30.3) {
-        RPS_Angle(89.0);
-    } else if (RPS.X() > 30.7) {
+        RPS_Angle(89.0); 
+    } else if (RPS.X() > 31.5) {
         RPS_Angle(93.0);
+    } else if (RPS.X() > 30.7) {
+        RPS_Angle(91.4);
     } else {
         RPS_Angle(90.0);
     }
-    /* Adjust heading
-    RPS_Angle(90.0); //Was 88.0 before 4/3 */
 
     // Go straight towards foosball
     move_forward(90, 12.5); //Was 70% power before 4/4
@@ -1058,7 +1060,7 @@ void doFoosball() {
     lever_servo.SetDegree(90.0);
 
     // Adjust heading
-    RPS_Angle(357.0); //Used to be 0.0
+    RPS_Angle(359.0); //Used to be 0.0
 
     // Go straight
     move_backward(60, 1.0);
@@ -1079,7 +1081,7 @@ void doLever() {
     Sleep(100);
 
     // Turn right
-    turnRight(40, 45.0);
+    turnRight(60, 45.0);
 
     // Adjust heading
     RPS_Angle(306.1); //Originally 315.0 and 308.0
@@ -1104,7 +1106,7 @@ void doLever() {
     turnRight(70, 120.0);
 
     // Go straight
-    move_forward(90, 14.0); //was 70
+    move_forward(90, 13.0); //was 70
 
     // Turn left
     turnLeft(70, 28.0);
@@ -1113,10 +1115,13 @@ void doLever() {
     RPS_Angle(270.0);
 
     // Go straight
-    move_forward(90, 7.8); //was 70
+    move_forward(90, 8.8); //was 70
+
+    // Adjust heading
+    RPS_Angle(270.0);
 
     // Adjust y position
-    RPS_Y_dec_abs(bumpY);
+    RPS_Y_dec_abs(bumpY + 0.5);
 }
 
 /*
@@ -1157,7 +1162,7 @@ void doToken() {
     move_backward(40, 2.5);
 
     // Turn left a little
-    turnLeft(50, 25.0);
+    turnLeft(50, 10.0);
 
     // Adjust heading
     RPS_Angle(180.0);
@@ -1189,10 +1194,11 @@ void finish() {
     RPS_Angle(270.0);
 
     // Hit final red button
-    bl_motor.SetPercent(95);
-    fr_motor.SetPercent(-95);
-    fl_motor.SetPercent(95);
-    br_motor.SetPercent(-95);
+    move_forward(100, 8.0);
+    bl_motor.SetPercent(100);
+    fr_motor.SetPercent(-15);
+    fl_motor.SetPercent(100);
+    br_motor.SetPercent(-15);
 }
 
 /*
@@ -1205,18 +1211,28 @@ void calibrate(){
 
     // Store location of desired distance from start
     while(i == 1){
-        // Print menu
-        LCD.DrawRectangle(55, 45, 200, 150);
-        LCD.WriteAt("Store POS1", 100, 126);
 
         LCD.Touch(&x_position, &y_position);
 
         while(!LCD.Touch(&x_position, &y_position)){
+            // Print menu
+            LCD.DrawRectangle(55, 45, 200, 150);
+            LCD.WriteAt("Store POS1", 100, 126);
+
             // Print RPS values
-            LCD.WriteAt("RPS X: ", 10, 210);
-            LCD.WriteAt(RPS.X(), 70, 210);
+            LCD.WriteAt("RPS X: ", 0, 210);
+            LCD.WriteAt(RPS.X(), 75, 210);
             LCD.WriteAt("RPS Y: ", 130, 210);
-            LCD.WriteAt(RPS.Y(), 190, 210);
+            LCD.WriteAt(RPS.Y(), 195, 210);
+
+            if(RPS.X() < 0){
+                LCD.SetBackgroundColor(RED);
+                LCD.Clear();
+            }
+            else{
+                LCD.SetBackgroundColor(BLACK);
+                LCD.Clear();
+            }
         }
         Sleep(500);
         if(y_position > 45 && y_position < 195 && x_position > 55 && x_position < 255){
@@ -1227,18 +1243,28 @@ void calibrate(){
 
     // Store location of DDR light
     while(i == 2){
-        // Print menu
-        LCD.DrawRectangle(55, 45, 200, 150);
-        LCD.WriteAt("Store POS2", 100, 126);
 
         LCD.Touch(&x_position, &y_position);
 
         while(!LCD.Touch(&x_position, &y_position)){
+            // Print menu
+            LCD.DrawRectangle(55, 45, 200, 150);
+            LCD.WriteAt("Store POS2", 100, 126);
+
             // Print RPS values
-            LCD.WriteAt("RPS X: ", 10, 210);
-            LCD.WriteAt(RPS.X(), 70, 210);
+            LCD.WriteAt("RPS X: ", 0, 210);
+            LCD.WriteAt(RPS.X(), 75, 210);
             LCD.WriteAt("RPS Y: ", 130, 210);
-            LCD.WriteAt(RPS.Y(), 190, 210);
+            LCD.WriteAt(RPS.Y(), 195, 210);
+
+            if(RPS.X() < 0){
+                LCD.SetBackgroundColor(RED);
+                LCD.Clear();
+            }
+            else{
+                LCD.SetBackgroundColor(BLACK);
+                LCD.Clear();
+            }
         }
         Sleep(500);
         if(y_position > 45 && y_position < 195 && x_position > 55 && x_position < 255){
@@ -1249,18 +1275,28 @@ void calibrate(){
 
     // Store location of distance from foosball structure
     while(i == 3){
-        // Print menu
-        LCD.DrawRectangle(55, 45, 200, 150);
-        LCD.WriteAt("Store POS3", 100, 126);
 
         LCD.Touch(&x_position, &y_position);
 
         while(!LCD.Touch(&x_position, &y_position)){
+            // Print menu
+            LCD.DrawRectangle(55, 45, 200, 150);
+            LCD.WriteAt("Store POS3", 100, 126);
+
             // Print RPS values
-            LCD.WriteAt("RPS X: ", 10, 210);
-            LCD.WriteAt(RPS.X(), 70, 210);
+            LCD.WriteAt("RPS X: ", 0, 210);
+            LCD.WriteAt(RPS.X(), 75, 210);
             LCD.WriteAt("RPS Y: ", 130, 210);
-            LCD.WriteAt(RPS.Y(), 190, 210);
+            LCD.WriteAt(RPS.Y(), 195, 210);
+
+            if(RPS.X() < 0){
+                LCD.SetBackgroundColor(RED);
+                LCD.Clear();
+            }
+            else{
+                LCD.SetBackgroundColor(BLACK);
+                LCD.Clear();
+            }
         }
         Sleep(500);
         if(y_position > 45 && y_position < 195 && x_position > 55 && x_position < 255){
@@ -1271,18 +1307,28 @@ void calibrate(){
 
     // Store location of bump
     while(i == 4){
-        // Print menu
-        LCD.DrawRectangle(55, 45, 200, 150);
-        LCD.WriteAt("Store POS4", 100, 126);
 
         LCD.Touch(&x_position, &y_position);
 
         while(!LCD.Touch(&x_position, &y_position)){
+            // Print menu
+            LCD.DrawRectangle(55, 45, 200, 150);
+            LCD.WriteAt("Store POS4", 100, 126);
+
             // Print RPS values
-            LCD.WriteAt("RPS X: ", 10, 210);
-            LCD.WriteAt(RPS.X(), 70, 210);
+            LCD.WriteAt("RPS X: ", 0, 210);
+            LCD.WriteAt(RPS.X(), 75, 210);
             LCD.WriteAt("RPS Y: ", 130, 210);
-            LCD.WriteAt(RPS.Y(), 190, 210);
+            LCD.WriteAt(RPS.Y(), 195, 210);
+
+            if(RPS.X() < 0){
+                LCD.SetBackgroundColor(RED);
+                LCD.Clear();
+            }
+            else{
+                LCD.SetBackgroundColor(BLACK);
+                LCD.Clear();
+            }
         }
         Sleep(500);
         if(y_position > 45 && y_position < 195 && x_position > 55 && x_position < 255){
@@ -1304,12 +1350,35 @@ void initialize(){
 
     float x_position, y_position;
 
-    RPS.InitializeTouchMenu();
-
     //Initialize the screen
     LCD.Clear(BLACK);
     LCD.SetFontColor(WHITE);
     LCD.WriteLine("Initializing...");
+
+    Sleep(750);
+
+    while(!LCD.Touch(&x_position, &y_position)){
+        int counter = 0;
+        LCD.Clear();
+        LCD.Write("CdS Reading: ");
+        // Get CdS value and display
+        LCD.WriteLine(cds.Value());
+        LCD.Write("Battery Level: ");
+        // get the voltage level and display it to the screen
+        LCD.WriteLine(Battery.Voltage());
+
+        Sleep(10);
+
+        if(cds.Value() > 3.2){
+            counter++;
+        }
+        if(counter >= 50){
+            LCD.WriteAt("Something is wrong with CdS cell", 0, 40);
+            break;
+        }
+    }
+
+    RPS.InitializeTouchMenu();
 
     lever_servo.SetMin(725);
     lever_servo.SetMax(2468);
