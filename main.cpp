@@ -765,14 +765,14 @@ bool checkDDRLight(int percent) {
     int failsafe = 0;
 
     while (!lightFound && failsafe < 10) {
-        if (ambient - cds.Value() >= redDiff - 0.25) { //Was 0.2 before, made more generous
+        if (ambient - cds.Value() >= redDiff - 0.32) { //Was 0.2 before, made more generous
             bl_motor.Stop();
             fr_motor.Stop();
             fl_motor.Stop();
             br_motor.Stop();
             lightFound = true;
             redLight = true;
-        } else if (ambient - cds.Value() <= redDiff - 0.255) {
+        } else if (ambient - cds.Value() <= redDiff - 0.325) {
             bl_motor.Stop();
             fr_motor.Stop();
             fl_motor.Stop();
@@ -1060,7 +1060,7 @@ void doFoosball() {
     lever_servo.SetDegree(90.0);
 
     // Adjust heading
-    RPS_Angle(359.0); //Used to be 0.0
+    RPS_Angle(358.0); //Used to be 0.0
 
     // Go straight
     move_backward(60, 1.0);
@@ -1103,7 +1103,11 @@ void doLever() {
     move_forward(50, 3.7);
 
     // Turn right
-    turnRight(70, 120.0);
+    turnRight(70, 123.0);
+
+    Sleep(50);
+    // Adjust heading
+    RPS_Angle(230.0);
 
     // Go straight
     move_forward(90, 13.0); //was 70
